@@ -25,6 +25,7 @@ ENV PHP_MODULES "$PHP_MODULES \
 
 RUN set -xe \
     && apt-get update && apt-get install -y \
+        ssmtp \
         php5-fpm \
         $PHP_MODULES \
         --no-install-recommends \
@@ -35,6 +36,7 @@ COPY pie-entrypoint.sh /usr/local/bin/
 # COPY pie-sitegen.pl /usr/local/bin/
 
 VOLUME /etc/opt/pie/php5/fpm
+VOLUME /etc/ssmtp
 VOLUME /var/www
 
 EXPOSE 9000
