@@ -1,16 +1,6 @@
 FROM sbutler/pie-base
 
-ENV PIE_EXP_MEMORY_SIZE 64
-ENV PIE_RES_MEMORY_SIZE 50
-
-ENV PHP_MEMORY_LIMIT        64M
-ENV PHP_POST_MAX_SIZE       30M
-ENV PHP_UPLOAD_MAX_FILESIZE 25M
-ENV PHP_MAX_FILE_UPLOADS    20
-ENV PHP_MAX_EXECUTION_TIME  120
-ENV PHP_DATE_TIMEZONE       "America/Chicago"
-
-ENV PHP_MODULES "$PHP_MODULES \
+ARG PHP_MODULES="\
   php5-mcrypt \
   php5-mysqlnd \
   php5-pspell aspell-en \
@@ -33,7 +23,16 @@ RUN set -xe \
 
 COPY etc/ /etc
 COPY pie-entrypoint.sh /usr/local/bin/
-# COPY pie-sitegen.pl /usr/local/bin/
+
+ENV PIE_EXP_MEMORY_SIZE 64
+ENV PIE_RES_MEMORY_SIZE 50
+
+ENV PHP_MEMORY_LIMIT        64M
+ENV PHP_POST_MAX_SIZE       30M
+ENV PHP_UPLOAD_MAX_FILESIZE 25M
+ENV PHP_MAX_FILE_UPLOADS    20
+ENV PHP_MAX_EXECUTION_TIME  120
+ENV PHP_DATE_TIMEZONE       "America/Chicago"
 
 VOLUME /etc/opt/pie/php5/fpm
 VOLUME /etc/ssmtp
