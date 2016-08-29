@@ -46,15 +46,29 @@ if [[ "$1" == "php-pie" ]]; then
 
   export PHP_FCGI_MAX_CHILDREN
 
+  (
+    # Start lighttpd to get PHP-FPM ping healthchecks
+    if [[ -f /etc/default/lighttpd ]]; then
+      . /etc/default/lighttpd
+    fi
+
+    LIGHTTPD_CONF_PIDFILE=$(sed -n 's/^\s*server\.pid-file\s*=\s*"(.+)"$/$1/p' /etc/lighttpd/lighttpd.conf)
+    LIGHTTPD_PIDFILE=${LIGHTTPD_CONF_PIDFILE:-/run/lighttpd.pid}
+
+    rm -f "$LIGHTTPD_PIDFILE"
+
+    lighttpd -f /etc/lighttpd/lighttpd.conf
+  )
+
   # Read configuration variable file if it is present
   if [[ -f /etc/default/php5-fpm ]]; then
   	. /etc/default/php5-fpm
   fi
 
-  CONF_PIDFILE=$(sed -n 's/^pid\s*=\s*//p' /etc/php5/fpm/php-fpm.conf)
-  PIDFILE=${CONF_PIDFILE:-/run/php5-fpm.pid}
+  PHP_CONF_PIDFILE=$(sed -n 's/^pid\s*=\s*//p' /etc/php5/fpm/php-fpm.conf)
+  PHP_PIDFILE=${PHP_CONF_PIDFILE:-/run/php5-fpm.pid}
 
-  rm -f "$PIDFILE"
+  rm -f "$PHP_PIDFILE"
 
   #pie-sitegen.pl 1>&2
   exec php5-fpm --nodaemonize --force-stderr --fpm-config /etc/php5/fpm/php-fpm.conf "$@"

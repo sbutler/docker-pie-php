@@ -15,6 +15,7 @@ ARG PHP_MODULES="\
 
 RUN set -xe \
     && apt-get update && apt-get install -y \
+        lighttpd \
         ssmtp \
         php5-fpm \
         $PHP_MODULES \
@@ -23,6 +24,11 @@ RUN set -xe \
 
 COPY etc/ /etc
 COPY pie-entrypoint.sh /usr/local/bin/
+
+RUN set -xe \
+    && mkdir /var/empty \
+    && lighttpd-enable-mod fastcgi \
+    && lighttpd-enable-mod fastcgi-php-ping
 
 ENV PIE_EXP_MEMORY_SIZE 64
 ENV PIE_RES_MEMORY_SIZE 50
@@ -39,6 +45,7 @@ VOLUME /etc/ssmtp
 VOLUME /var/www
 
 EXPOSE 9000
+EXPOSE 9001
 
 ENTRYPOINT ["/usr/local/bin/pie-entrypoint.sh"]
 CMD ["php-pie"]
