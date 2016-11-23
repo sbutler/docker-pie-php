@@ -13,6 +13,9 @@ ARG PHP_MODULES="\
   php5-memcached \
   "
 
+ARG PHP_POOL_UID_MIN=9000
+ARG PHP_POOL_UID_MAX=9100
+
 RUN set -xe \
     && apt-get update && apt-get install -y \
         lighttpd \
@@ -31,6 +34,9 @@ RUN set -xe \
     && mkdir /run/php5-fpm.sock.d && chmod 0755 /run/php5-fpm.sock.d \
     && rm /etc/php5/fpm/pool.d/www.conf \
     && useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent \
+    && for pool_idx in $(seq $PHP_POOL_UID_MIN $PHP_POOL_UID_MAX); do \
+        useradd -N -r -g users -s /usr/sbin/nologin -u $pool_idx pie-pool${pool_idx}; \
+       done \
     && lighttpd-enable-mod fastcgi \
     && lighttpd-enable-mod pie-agent
 
