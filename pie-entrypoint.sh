@@ -3,8 +3,17 @@ set -e
 
 echoerr () { echo "$@" 1>&2; }
 
-if [[ "$1" == "php-pie" ]]; then
-  shift
+php_envset () {
+  echoerr "LIGHTTPD_STATUS_SUBNET: ${LIGHTTPD_STATUS_SUBNET:=10.0.0.0/8}"
+  
+  echoerr "PHP_MEMORY_LIMIT: ${PHP_MEMORY_LIMIT:=64M}"
+  echoerr "PHP_POST_MAX_SIZE: ${PHP_POST_MAX_SIZE:=30M}"
+  echoerr "PHP_UPLOAD_MAX_FILESIZE: ${PHP_UPLOAD_MAX_FILESIZE:=25M}"
+  echoerr "PHP_MAX_FILE_UPLOADS: ${PHP_MAX_FILE_UPLOADS:=20}"
+  echoerr "PHP_MAX_EXECUTION_TIME: ${PHP_MAX_EXECUTION_TIME:=120}"
+  echoerr "PHP_DATE_TIMEZONE: ${PHP_DATE_TIMEZONE:=America/Chicago}"
+
+  export PHP_MEMORY_LIMIT PHP_POST_MAX_SIZE PHP_UPLOAD_MAX_FILESIZE PHP_MAX_FILE_UPLOADS PHP_MAX_EXECUTION_TIME PHP_DATE_TIMEZONE
 
   # Attempt to set ServerLimit and MaxRequestWorkers based on the amount of
   # memory in the container. This will never use less than 16 servers, and
@@ -46,6 +55,18 @@ if [[ "$1" == "php-pie" ]]; then
 
   export PHP_FCGI_MAX_CHILDREN
 
+  # Read configuration variable file if it is present
+  if [[ -f /etc/default/php5-fpm ]]; then
+  	. /etc/default/php5-fpm
+  fi
+
+  PHP_CONF_PIDFILE=$(sed -n 's/^pid\s*=\s*//p' /etc/php5/fpm/php-fpm.conf)
+  PHP_PIDFILE=${PHP_CONF_PIDFILE:-/run/php5-fpm.pid}
+}
+
+if [[ "$1" == "php-pie" ]]; then
+  shift
+
   (
     # Start lighttpd to get PHP-FPM ping healthchecks
     if [[ -f /etc/default/lighttpd ]]; then
@@ -56,22 +77,17 @@ if [[ "$1" == "php-pie" ]]; then
     LIGHTTPD_PIDFILE=${LIGHTTPD_CONF_PIDFILE:-/run/lighttpd.pid}
 
     rm -f "$LIGHTTPD_PIDFILE"
-
     lighttpd -f /etc/lighttpd/lighttpd.conf
   )
 
-  # Read configuration variable file if it is present
-  if [[ -f /etc/default/php5-fpm ]]; then
-  	. /etc/default/php5-fpm
-  fi
-
-  PHP_CONF_PIDFILE=$(sed -n 's/^pid\s*=\s*//p' /etc/php5/fpm/php-fpm.conf)
-  PHP_PIDFILE=${PHP_CONF_PIDFILE:-/run/php5-fpm.pid}
+  php_envset
 
   rm -f "$PHP_PIDFILE"
-
-  #pie-sitegen.pl 1>&2
   exec php5-fpm --nodaemonize --force-stderr --fpm-config /etc/php5/fpm/php-fpm.conf "$@"
+elif [[ "$1" == "php"* ]]; then
+  php_envset
+
+  exec "$@"
 else
   exec "$@"
 fi

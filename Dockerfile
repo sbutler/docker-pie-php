@@ -23,15 +23,18 @@ RUN set -xe \
     && rm -rf /var/lib/apt/lists/*
 
 COPY etc/ /etc
+COPY opt/ /opt
 COPY pie-entrypoint.sh /usr/local/bin/
 
 RUN set -xe \
     && mkdir /var/empty \
     && lighttpd-enable-mod fastcgi \
-    && lighttpd-enable-mod fastcgi-php-ping
+    && lighttpd-enable-mod pie-management
 
 ENV PIE_EXP_MEMORY_SIZE 64
 ENV PIE_RES_MEMORY_SIZE 50
+
+ENV LIGHTTPD_STATUS_SUBNET  10.0.0.0/8
 
 ENV PHP_MEMORY_LIMIT        64M
 ENV PHP_POST_MAX_SIZE       30M
@@ -44,8 +47,9 @@ VOLUME /etc/opt/pie/php5/fpm
 VOLUME /etc/ssmtp
 VOLUME /var/www
 
-EXPOSE 9000
-EXPOSE 9001
+EXPOSE 9000-10000
+EXPOSE 8008
+EXPOSE 8999
 
 ENTRYPOINT ["/usr/local/bin/pie-entrypoint.sh"]
 CMD ["php-pie"]
