@@ -1,3 +1,3 @@
 Defaults!/usr/local/bin/pie-entrypoint.sh   env_keep += "PIE_EXP_MEMORY_SIZE PIE_RES_MEMORY_SIZE PHP_MEMORY_LIMIT PHP_POST_MAX_SIZE PHP_UPLOAD_MAX_FILESIZE PHP_MAX_FILE_UPLOADS PHP_MAX_EXECUTION_TIME PHP_DATE_TIMEZONE"
 
-nobody    ALL = NOPASSWD: /usr/local/bin/pie-entrypoint.sh php5-fpm -t *, /bin/kill -USR2 1
+pie-agent    ALL = NOPASSWD: /usr/local/bin/pie-entrypoint.sh php5-fpm -t *, /bin/kill -USR2 1

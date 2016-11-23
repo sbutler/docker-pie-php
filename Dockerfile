@@ -28,8 +28,11 @@ COPY pie-entrypoint.sh /usr/local/bin/
 
 RUN set -xe \
     && mkdir /var/empty \
+    && mkdir /run/php5-fpm.sock.d && chmod 0755 /run/php5-fpm.sock.d \
+    && rm /etc/php5/fpm/pool.d/www.conf \
+    && useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent \
     && lighttpd-enable-mod fastcgi \
-    && lighttpd-enable-mod pie-management
+    && lighttpd-enable-mod pie-agent
 
 ENV PIE_EXP_MEMORY_SIZE 64
 ENV PIE_RES_MEMORY_SIZE 50
@@ -49,7 +52,6 @@ VOLUME /var/www
 
 EXPOSE 9000-10000
 EXPOSE 8008
-EXPOSE 8999
 
 ENTRYPOINT ["/usr/local/bin/pie-entrypoint.sh"]
 CMD ["php-pie"]
