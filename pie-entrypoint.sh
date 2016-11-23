@@ -4,8 +4,8 @@ set -e
 echoerr () { echo "$@" 1>&2; }
 
 php_envset () {
-  echoerr "LIGHTTPD_STATUS_SUBNET: ${LIGHTTPD_STATUS_SUBNET:=10.0.0.0/8}"
-  
+  echoerr "LIGHTTPD_ADMIN_SUBNET: ${LIGHTTPD_ADMIN_SUBNET:=10.0.0.0/8}"
+
   echoerr "PHP_MEMORY_LIMIT: ${PHP_MEMORY_LIMIT:=64M}"
   echoerr "PHP_POST_MAX_SIZE: ${PHP_POST_MAX_SIZE:=30M}"
   echoerr "PHP_UPLOAD_MAX_FILESIZE: ${PHP_UPLOAD_MAX_FILESIZE:=25M}"
