@@ -1,5 +1,8 @@
 FROM sbutler/pie-base
 
+ARG HTTPD_UID=8001
+ARG HTTPD_GID=8001
+
 ARG PHP_MODULES="\
   php7.0-mcrypt \
   php7.0-mysqlnd \
@@ -35,6 +38,8 @@ COPY opt/ /opt
 COPY pie-entrypoint.sh /usr/local/bin/
 
 RUN set -xe \
+    && groupadd -r -g $HTTPD_GID pie-www-data \
+    && useradd -N -r -g pie-www-data -s /usr/sbin/nologin -u $HTTPD_UID pie-www-data \
     && mkdir /var/empty \
     && mkdir /run/php7.0-fpm.sock.d && chmod 0755 /run/php7.0-fpm.sock.d \
     && rm /etc/php/7.0/fpm/pool.d/www.conf \
