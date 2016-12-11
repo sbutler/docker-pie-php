@@ -4,16 +4,22 @@ ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
 
 ARG PHP_MODULES="\
+  php7.0-curl \
+  php7.0-gd \
+  php7.0-igbinary \
+  php7.0-intl \
+  php7.0-ldap \
   php7.0-mcrypt \
+  php7.0-memcached \
   php7.0-mysqlnd \
+  php7.0-odbc \
+  php7.0-pgsql \
   php7.0-pspell aspell-en \
+  php7.0-sqlite \
+  php7.0-ssh2 \
   php7.0-tidy \
   php7.0-xmlrpc \
   php7.0-xsl \
-  php7.0-gd \
-  php7.0-ldap \
-  php7.0-ssh2 \
-  php7.0-memcached \
   "
 
 ARG PHP_POOL_UID_MIN=9000
