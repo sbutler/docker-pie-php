@@ -4,37 +4,41 @@ ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
 
 ARG PHP_MODULES="\
-  php7.0-curl \
-  php7.0-gd \
-  php7.0-igbinary \
-  php7.0-intl \
-  php7.0-ldap \
-  php7.0-mcrypt \
-  php7.0-memcached \
-  php7.0-mysqlnd \
-  php7.0-odbc \
-  php7.0-pgsql \
-  php7.0-pspell aspell-en \
-  php7.0-sqlite \
-  php7.0-ssh2 \
-  php7.0-tidy \
-  php7.0-xmlrpc \
-  php7.0-xsl \
+  php7.1-curl \
+  php7.1-gd \
+  php7.1-igbinary \
+  php7.1-intl \
+  php7.1-ldap \
+  php7.1-mcrypt \
+  php7.1-memcached \
+  php7.1-mysqlnd \
+  php7.1-odbc \
+  php7.1-pgsql \
+  php7.1-pspell aspell-en \
+  php7.1-sqlite \
+  php7.1-ssh2 \
+  php7.1-tidy \
+  php7.1-xmlrpc \
+  php7.1-xsl \
   "
 
 ARG PHP_POOL_UID_MIN=9000
 ARG PHP_POOL_UID_MAX=9100
 
-COPY dotdeb.gpg /tmp
+COPY sury-php.gpg /tmp
 
 RUN set -xe \
-    && echo "deb http://packages.dotdeb.org jessie all" >> /etc/apt/sources.list.d/dotdeb.org.list \
-    && echo "deb-src http://packages.dotdeb.org jessie all" >> /etc/apt/sources.list.d/dotdeb.org.list \
-    && apt-key add /tmp/dotdeb.gpg && rm /tmp/dotdeb.gpg \
+    && apt-get update && apt-get install -y \
+        apt-transport-https \
+        ca-certificates \
+        --no-install-recommends \
+    && echo "deb https://packages.sury.org/php/ jessie main" >> /etc/apt/sources.list.d/sury-php.list \
+    && echo "deb-src https://packages.sury.org/php/ jessie main" >> /etc/apt/sources.list.d/sury-php.list \
+    && apt-key add /tmp/sury-php.gpg && rm /tmp/sury-php.gpg \
     && apt-get update && apt-get install -y \
         lighttpd \
         ssmtp \
-        php7.0-fpm \
+        php7.1-fpm \
         $PHP_MODULES \
         --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
@@ -47,8 +51,8 @@ RUN set -xe \
     && groupadd -r -g $HTTPD_GID pie-www-data \
     && useradd -N -r -g pie-www-data -s /usr/sbin/nologin -u $HTTPD_UID pie-www-data \
     && mkdir /var/empty \
-    && mkdir /run/php7.0-fpm.sock.d && chmod 0755 /run/php7.0-fpm.sock.d \
-    && rm /etc/php/7.0/fpm/pool.d/www.conf \
+    && mkdir /run/php7.1-fpm.sock.d && chmod 0755 /run/php7.1-fpm.sock.d \
+    && rm /etc/php/7.1/fpm/pool.d/www.conf \
     && useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent \
     && for pool_idx in $(seq $PHP_POOL_UID_MIN $PHP_POOL_UID_MAX); do \
         useradd -N -r -g users -s /usr/sbin/nologin -u $pool_idx pie-pool${pool_idx}; \
@@ -80,7 +84,7 @@ ENV PHP_REALPATH_CACHE_TTL              120
 # FPM settings
 ENV PHP_FCGI_MAX_REQUESTS   0
 
-VOLUME /etc/opt/pie/php7.0/fpm
+VOLUME /etc/opt/pie/php7.1/fpm
 VOLUME /etc/ssmtp
 VOLUME /var/www
 
