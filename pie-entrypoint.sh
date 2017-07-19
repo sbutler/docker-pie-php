@@ -60,49 +60,49 @@ php_envset () {
   export PHP_MEMORY_LIMIT PHP_POST_MAX_SIZE PHP_UPLOAD_MAX_FILESIZE PHP_MAX_FILE_UPLOADS PHP_MAX_EXECUTION_TIME PHP_DATE_TIMEZONE
   export PHP_SESSION_SAVE_HANDLER PHP_SESSION_SAVE_PATH
   export PHP_OPCACHE_MEMORY_CONSUMPTION PHP_OPCACHE_REVALIDATE_FREQ PHP_OPCACHE_INTERNED_STRINGS_BUFFER PHP_OPCACHE_MAX_ACCELERATED_FILES PHP_REALPATH_CACHE_SIZE PHP_REALPATH_CACHE_TTL
-  export PHP_FCGI_MAX_REQUESTS PHP_FCGI_MAX_CHILDREN
+  export PHP_FCGI_MAX_REQUESTS
 
   if (( PHP_FCGI_MAX_CHILDREN <= 0 )); then
-      # Attempt to set ServerLimit and MaxRequestWorkers based on the amount of
-      # memory in the container. This will never use less than 16 servers, and
-      # never more than 2000. If no memory limits are specified, then it will
-      # use free space
-      exp_memory_size=${PIE_EXP_MEMORY_SIZE:-50}
-      res_memory_size=${PIE_RES_MEMORY_SIZE:-50}
+    # Attempt to set ServerLimit and MaxRequestWorkers based on the amount of
+    # memory in the container. This will never use less than 16 servers, and
+    # never more than 2000. If no memory limits are specified, then it will
+    # use free space
+    exp_memory_size=${PIE_EXP_MEMORY_SIZE:-50}
+    res_memory_size=${PIE_RES_MEMORY_SIZE:-50}
 
-      ram_limit=0
-      if [[ -f "/sys/fs/cgroup/memory/memory.limit_in_bytes" ]]; then
-        ram_limit=$(</sys/fs/cgroup/memory/memory.limit_in_bytes)
-        if [[ "$ram_limit" = "9223372036854771712" ]]; then
-          ram_limit=0
-        else
-          ram_limit=$(echo "$ram_limit" | awk '{ print int( $1 / 1048576 ) }')
-        fi
+    ram_limit=0
+    if [[ -f "/sys/fs/cgroup/memory/memory.limit_in_bytes" ]]; then
+      ram_limit=$(</sys/fs/cgroup/memory/memory.limit_in_bytes)
+      if [[ "$ram_limit" = "9223372036854771712" ]]; then
+        ram_limit=0
+      else
+        ram_limit=$(echo "$ram_limit" | awk '{ print int( $1 / 1048576 ) }')
       fi
-      (( ram_limit <= 0 )) && ram_limit=$(free -mo | awk '/^Mem:/ { print $4 + $6 + $7 }')
+    fi
+    (( ram_limit <= 0 )) && ram_limit=$(free -mo | awk '/^Mem:/ { print $4 + $6 + $7 }')
 
-      echoerr "exp_memory_size: $exp_memory_size MB"
-      echoerr "res_memory_size: $res_memory_size MB"
-      echoerr "ram_limit: $ram_limit MB"
+    echoerr "exp_memory_size: $exp_memory_size MB"
+    echoerr "res_memory_size: $res_memory_size MB"
+    echoerr "ram_limit: $ram_limit MB"
 
-      PHP_FCGI_MAX_CHILDREN=5
+    PHP_FCGI_MAX_CHILDREN=5
 
-      if (( ram_limit > 0 )); then
-        PHP_FCGI_MAX_CHILDREN=$( \
-          echo "$exp_memory_size $res_memory_size $ram_limit" \
-          | awk '{ print int( ($3 - $2) / $1 ) }' \
-        )
-        if (( PHP_FCGI_MAX_CHILDREN < 5 )); then
-          PHP_FCGI_MAX_CHILDREN=5
-        elif (( PHP_FCGI_MAX_CHILDREN > 512 )); then
-          PHP_FCGI_MAX_CHILDREN=512
-        fi
+    if (( ram_limit > 0 )); then
+      PHP_FCGI_MAX_CHILDREN=$( \
+        echo "$exp_memory_size $res_memory_size $ram_limit" \
+        | awk '{ print int( ($3 - $2) / $1 ) }' \
+      )
+      if (( PHP_FCGI_MAX_CHILDREN < 5 )); then
+        PHP_FCGI_MAX_CHILDREN=5
+      elif (( PHP_FCGI_MAX_CHILDREN > 512 )); then
+        PHP_FCGI_MAX_CHILDREN=512
       fi
+    fi
 
-      echoerr "PHP_FCGI_MAX_CHILDREN (calculated): $PHP_FCGI_MAX_CHILDREN"
-
-      export PHP_FCGI_MAX_CHILDREN
+    echoerr "PHP_FCGI_MAX_CHILDREN (calculated): $PHP_FCGI_MAX_CHILDREN"
   fi
+
+  export PHP_FCGI_MAX_CHILDREN
 
   # Read configuration variable file if it is present
   if [[ -f /etc/default/php7.1-fpm ]]; then
