@@ -49,7 +49,7 @@ my %data = (
 try {
   my ($output, $res);
 
-  $res = run [qw#sudo pie-entrypoint.sh php5.6-fpm -t --fpm-config /etc/php5/fpm/php-fpm.conf#], '>&', \$output, timeout( 60 );
+  $res = run [qw#sudo pie-entrypoint.sh php5.6-fpm -t --fpm-config /etc/php/5.6/fpm/php-fpm.conf#], '>&', \$output, timeout( 60 );
   $data{ 'configtest' } = $output;
   die "configtest failed" unless $res;
 
