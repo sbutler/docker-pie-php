@@ -98,12 +98,12 @@ php_envset () {
   export PHP_FCGI_MAX_CHILDREN
 
   # Read configuration variable file if it is present
-  if [[ -f /etc/default/php7.1-fpm ]]; then
-  	. /etc/default/php7.1-fpm
+  if [[ -f /etc/default/php5.6-fpm ]]; then
+    . /etc/default/php5.6-fpm
   fi
 
-  PHP_CONF_PIDFILE=$(sed -n 's/^pid\s*=\s*//p' /etc/php/7.1/fpm/php-fpm.conf)
-  PHP_PIDFILE=${PHP_CONF_PIDFILE:-/run/php7.1-fpm.pid}
+  PHP_CONF_PIDFILE=$(sed -n 's/^pid\s*=\s*//p' /etc/php/5.6/fpm/php-fpm.conf)
+  PHP_PIDFILE=${PHP_CONF_PIDFILE:-/run/php5.6-fpm.pid}
 }
 
 if [[ "$1" == "php-pie" ]]; then
@@ -125,7 +125,7 @@ if [[ "$1" == "php-pie" ]]; then
   php_envset
 
   rm -f "$PHP_PIDFILE"
-  exec php-fpm7.1 --nodaemonize --force-stderr --fpm-config /etc/php/7.1/fpm/php-fpm.conf "$@"
+  exec php-fpm5.6 --nodaemonize --force-stderr --fpm-config /etc/php/5.6/fpm/php-fpm.conf "$@"
 elif [[ "$1" == "php"* ]]; then
   php_envset
 

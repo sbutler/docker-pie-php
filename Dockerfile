@@ -35,22 +35,23 @@ ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
 
 ARG PHP_MODULES="\
-  php7.1-curl \
-  php7.1-gd \
-  php7.1-igbinary \
-  php7.1-intl \
-  php7.1-ldap \
-  php7.1-mcrypt \
-  php7.1-memcached \
-  php7.1-mysqlnd \
-  php7.1-odbc \
-  php7.1-pgsql \
-  php7.1-pspell aspell-en \
-  php7.1-sqlite \
-  php7.1-ssh2 \
-  php7.1-tidy \
-  php7.1-xmlrpc \
-  php7.1-xsl \
+  php5.6-curl \
+  php5.6-gd \
+  php5.6-igbinary \
+  php5.6-intl \
+  php5.6-ldap \
+  php5.6-mcrypt \
+  php5.6-memcached \
+  php5.6-mysqlnd \
+  php5.6-odbc \
+  php5.6-pgsql \
+  php5.6-pspell aspell-en \
+  php5.6-redis \
+  php5.6-sqlite \
+  php5.6-ssh2 \
+  php5.6-tidy \
+  php5.6-xmlrpc \
+  php5.6-xsl \
   "
 
 ARG PHP_POOL_UID_MIN=9000
@@ -69,7 +70,7 @@ RUN set -xe \
     && apt-get update && apt-get install -y \
         lighttpd \
         ssmtp \
-        php7.1-fpm \
+        php5.6-fpm \
         $PHP_MODULES \
         --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
@@ -82,11 +83,14 @@ RUN set -xe \
     && groupadd -r -g $HTTPD_GID pie-www-data \
     && useradd -N -r -g pie-www-data -s /usr/sbin/nologin -u $HTTPD_UID pie-www-data \
     && mkdir /var/empty \
-    && mkdir /run/php7.1-fpm.sock.d && chmod 0755 /run/php7.1-fpm.sock.d \
-    && rm /etc/php/7.1/fpm/pool.d/www.conf \
+    && mkdir /run/php5.6-fpm.sock.d && chmod 0755 /run/php5.6-fpm.sock.d \
+    && rm /etc/php/5.6/fpm/pool.d/www.conf \
     && useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent \
     && for pool_idx in $(seq $PHP_POOL_UID_MIN $PHP_POOL_UID_MAX); do \
         useradd -N -r -g users -s /usr/sbin/nologin -u $pool_idx pie-pool${pool_idx}; \
+        mkdir /tmp/php.pie-pool${pool_idx}; \
+        chown pie-pool${pool_idx}:users /tmp/php.pie-pool${pool_idx}; \
+        chmod u=rwx,g=,o= /tmp/php.pie-pool${pool_idx}; \
        done \
     && lighttpd-enable-mod fastcgi \
     && lighttpd-enable-mod pie-agent
@@ -115,7 +119,7 @@ ENV PHP_REALPATH_CACHE_TTL              120
 # FPM settings
 ENV PHP_FCGI_MAX_REQUESTS   0
 
-VOLUME /etc/opt/pie/php7.1/fpm
+VOLUME /etc/opt/pie/php5.6/fpm
 VOLUME /etc/ssmtp
 VOLUME /var/www
 
