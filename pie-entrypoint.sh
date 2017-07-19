@@ -99,7 +99,7 @@ php_envset () {
 
   # Read configuration variable file if it is present
   if [[ -f /etc/default/php7.1-fpm ]]; then
-  	. /etc/default/php7.1-fpm
+    . /etc/default/php7.1-fpm
   fi
 
   PHP_CONF_PIDFILE=$(sed -n 's/^pid\s*=\s*//p' /etc/php/7.1/fpm/php-fpm.conf)

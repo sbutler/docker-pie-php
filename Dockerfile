@@ -46,6 +46,7 @@ ARG PHP_MODULES="\
   php7.1-odbc \
   php7.1-pgsql \
   php7.1-pspell aspell-en \
+  php7.1-redis \
   php7.1-sqlite \
   php7.1-ssh2 \
   php7.1-tidy \
@@ -87,6 +88,9 @@ RUN set -xe \
     && useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent \
     && for pool_idx in $(seq $PHP_POOL_UID_MIN $PHP_POOL_UID_MAX); do \
         useradd -N -r -g users -s /usr/sbin/nologin -u $pool_idx pie-pool${pool_idx}; \
+        mkdir /tmp/php.pie-pool${pool_idx}; \
+        chown pie-pool${pool_idx}:users /tmp/php.pie-pool${pool_idx}; \
+        chmod u=rwx,g=,o= /tmp/php.pie-pool${pool_idx}; \
        done \
     && lighttpd-enable-mod fastcgi \
     && lighttpd-enable-mod pie-agent
