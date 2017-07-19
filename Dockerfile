@@ -1,3 +1,34 @@
+# Copyright (c) 2017 University of Illinois Board of Trustees
+# All rights reserved.
+#
+# Developed by:         Technology Services
+#                       University of Illinois at Urbana-Champaign
+#                       https://techservices.illinois.edu/
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# with the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+#      * Redistributions of source code must retain the above copyright notice,
+#        this list of conditions and the following disclaimers.
+#      * Redistributions in binary form must reproduce the above copyright notice,
+#        this list of conditions and the following disclaimers in the
+#        documentation and/or other materials provided with the distribution.
+#      * Neither the names of Technology Services, University of Illinois at
+#        Urbana-Champaign, nor the names of its contributors may be used to
+#        endorse or promote products derived from this Software without specific
+#        prior written permission.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH
+# THE SOFTWARE.
 FROM sbutler/pie-base
 
 ARG HTTPD_UID=8001
@@ -15,6 +46,7 @@ ARG PHP_MODULES="\
   php7.0-odbc \
   php7.0-pgsql \
   php7.0-pspell aspell-en \
+  php7.0-redis \
   php7.0-sqlite \
   php7.0-ssh2 \
   php7.0-tidy \
@@ -25,12 +57,16 @@ ARG PHP_MODULES="\
 ARG PHP_POOL_UID_MIN=9000
 ARG PHP_POOL_UID_MAX=9100
 
-COPY dotdeb.gpg /tmp
+COPY sury-php.gpg /tmp
 
 RUN set -xe \
-    && echo "deb http://packages.dotdeb.org jessie all" >> /etc/apt/sources.list.d/dotdeb.org.list \
-    && echo "deb-src http://packages.dotdeb.org jessie all" >> /etc/apt/sources.list.d/dotdeb.org.list \
-    && apt-key add /tmp/dotdeb.gpg && rm /tmp/dotdeb.gpg \
+    && apt-get update && apt-get install -y \
+        apt-transport-https \
+        ca-certificates \
+        --no-install-recommends \
+    && echo "deb https://packages.sury.org/php/ jessie main" >> /etc/apt/sources.list.d/sury-php.list \
+    && echo "deb-src https://packages.sury.org/php/ jessie main" >> /etc/apt/sources.list.d/sury-php.list \
+    && apt-key add /tmp/sury-php.gpg && rm /tmp/sury-php.gpg \
     && apt-get update && apt-get install -y \
         lighttpd \
         ssmtp \
@@ -52,6 +88,9 @@ RUN set -xe \
     && useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent \
     && for pool_idx in $(seq $PHP_POOL_UID_MIN $PHP_POOL_UID_MAX); do \
         useradd -N -r -g users -s /usr/sbin/nologin -u $pool_idx pie-pool${pool_idx}; \
+        mkdir /tmp/php.pie-pool${pool_idx}; \
+        chown pie-pool${pool_idx}:users /tmp/php.pie-pool${pool_idx}; \
+        chmod u=rwx,g=,o= /tmp/php.pie-pool${pool_idx}; \
        done \
     && lighttpd-enable-mod fastcgi \
     && lighttpd-enable-mod pie-agent
