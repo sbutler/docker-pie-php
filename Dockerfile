@@ -40,9 +40,11 @@ ARG PHP_MODULES="\
   php7.1-igbinary \
   php7.1-intl \
   php7.1-ldap \
+  php7.1-mbstring \
   php7.1-mcrypt \
   php7.1-memcached \
   php7.1-mysqlnd \
+  php7.1-oauth \
   php7.1-odbc \
   php7.1-pgsql \
   php7.1-pspell aspell-en \
@@ -50,6 +52,7 @@ ARG PHP_MODULES="\
   php7.1-sqlite \
   php7.1-ssh2 \
   php7.1-tidy \
+  php7.1-xml \
   php7.1-xmlrpc \
   php7.1-xsl \
   "
