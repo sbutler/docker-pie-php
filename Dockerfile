@@ -40,9 +40,11 @@ ARG PHP_MODULES="\
   php5.6-igbinary \
   php5.6-intl \
   php5.6-ldap \
+  php5.6-mbstring \
   php5.6-mcrypt \
   php5.6-memcached \
   php5.6-mysqlnd \
+  php5.6-oauth \
   php5.6-odbc \
   php5.6-pgsql \
   php5.6-pspell aspell-en \
@@ -50,6 +52,7 @@ ARG PHP_MODULES="\
   php5.6-sqlite \
   php5.6-ssh2 \
   php5.6-tidy \
+  php5.6-xml \
   php5.6-xmlrpc \
   php5.6-xsl \
   "
