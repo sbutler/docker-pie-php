@@ -35,7 +35,10 @@ ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
 
 ARG PHP_MODULES="\
+  php5.6-bcmath \
+  php5.6-bz2 \
   php5.6-curl \
+  php5.6-dba \
   php5.6-gd \
   php5.6-igbinary \
   php5.6-intl \
@@ -49,12 +52,14 @@ ARG PHP_MODULES="\
   php5.6-pgsql \
   php5.6-pspell aspell-en \
   php5.6-redis \
+  php5.6-soap \
   php5.6-sqlite \
   php5.6-ssh2 \
   php5.6-tidy \
   php5.6-xml \
   php5.6-xmlrpc \
   php5.6-xsl \
+  php5.6-zip \
   "
 
 ARG PHP_POOL_UID_MIN=9000
