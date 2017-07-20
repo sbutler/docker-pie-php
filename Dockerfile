@@ -35,7 +35,10 @@ ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
 
 ARG PHP_MODULES="\
+  php7.1-bcmath \
+  php7.1-bz2 \
   php7.1-curl \
+  php7.1-dba \
   php7.1-gd \
   php7.1-igbinary \
   php7.1-intl \
@@ -49,12 +52,14 @@ ARG PHP_MODULES="\
   php7.1-pgsql \
   php7.1-pspell aspell-en \
   php7.1-redis \
+  php7.1-soap \
   php7.1-sqlite \
   php7.1-ssh2 \
   php7.1-tidy \
   php7.1-xml \
   php7.1-xmlrpc \
   php7.1-xsl \
+  php7.1-zip \
   "
 
 ARG PHP_POOL_UID_MIN=9000
