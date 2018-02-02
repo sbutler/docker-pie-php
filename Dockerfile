@@ -76,6 +76,7 @@ RUN set -xe \
     && echo "deb-src https://packages.sury.org/php/ jessie main" >> /etc/apt/sources.list.d/sury-php.list \
     && apt-key add /tmp/sury-php.gpg && rm /tmp/sury-php.gpg \
     && apt-get update && apt-get install -y \
+        curl \
         lighttpd \
         ssmtp \
         php7.1-fpm \
@@ -102,6 +103,14 @@ RUN set -xe \
        done \
     && lighttpd-enable-mod fastcgi \
     && lighttpd-enable-mod pie-agent
+
+COPY pie-dynamodb-sessions/ /usr/local/share/pie-dynamodb-sessions/
+
+RUN set -xe \
+    && cd /usr/local/bin \
+    && curl --location --fail https://getcomposer.org/installer | php \
+    && cd /usr/local/share/pie-dynamodb-sessions \
+    && COMPOSER_ALLOW_SUPERUSER=1 composer.phar install --no-interaction --no-ansi --no-progress --optimize-autoloader
 
 ENV PIE_EXP_MEMORY_SIZE 64
 ENV PIE_RES_MEMORY_SIZE 50

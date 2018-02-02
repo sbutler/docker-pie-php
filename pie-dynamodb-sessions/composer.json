@@ -1,0 +1,16 @@
+{
+    "name": "pie/dynamodb-sessions",
+    "homepage": "https://techservices.illinois.edu/",
+    "description": "Publish @ Illinois Library for storing PHP Sessions in DynamoDB.",
+    "type": "library",
+    "license": "University of Illinois/NCSA",
+    "authors": [
+        {
+            "name": "Stephen J. Butler",
+            "email": "stephen.butler@gmail.com"
+        }
+    ],
+    "require": {
+        "aws/aws-sdk-php": "^3.52.2"
+    }
+}
