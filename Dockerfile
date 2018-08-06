@@ -53,7 +53,7 @@ ARG PHP_MODULES="\
   php7.1-pspell aspell-en \
   php7.1-redis \
   php7.1-soap \
-  php7.1-sqlite \
+  php7.1-sqlite3 \
   php7.1-ssh2 \
   php7.1-tidy \
   php7.1-xml \
