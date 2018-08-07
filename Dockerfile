@@ -33,33 +33,34 @@ FROM sbutler/pie-base
 
 ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
+ENV PIE_PHP_VERSION 7.1
 
 ARG PHP_MODULES="\
-  php7.1-bcmath \
-  php7.1-bz2 \
-  php7.1-curl \
-  php7.1-dba \
-  php7.1-gd \
-  php7.1-igbinary \
-  php7.1-intl \
-  php7.1-ldap \
-  php7.1-mbstring \
-  php7.1-mcrypt \
-  php7.1-memcached \
-  php7.1-mysqlnd \
-  php7.1-oauth \
-  php7.1-odbc \
-  php7.1-pgsql \
-  php7.1-pspell aspell-en \
-  php7.1-redis \
-  php7.1-soap \
-  php7.1-sqlite3 \
-  php7.1-ssh2 \
-  php7.1-tidy \
-  php7.1-xml \
-  php7.1-xmlrpc \
-  php7.1-xsl \
-  php7.1-zip \
+  php${PIE_PHP_VERSION}-bcmath \
+  php${PIE_PHP_VERSION}-bz2 \
+  php${PIE_PHP_VERSION}-curl \
+  php${PIE_PHP_VERSION}-dba \
+  php${PIE_PHP_VERSION}-gd \
+  php${PIE_PHP_VERSION}-igbinary \
+  php${PIE_PHP_VERSION}-intl \
+  php${PIE_PHP_VERSION}-ldap \
+  php${PIE_PHP_VERSION}-mbstring \
+  php${PIE_PHP_VERSION}-mcrypt \
+  php${PIE_PHP_VERSION}-memcached \
+  php${PIE_PHP_VERSION}-mysqlnd \
+  php${PIE_PHP_VERSION}-oauth \
+  php${PIE_PHP_VERSION}-odbc \
+  php${PIE_PHP_VERSION}-pgsql \
+  php${PIE_PHP_VERSION}-pspell aspell-en \
+  php${PIE_PHP_VERSION}-redis \
+  php${PIE_PHP_VERSION}-soap \
+  php${PIE_PHP_VERSION}-sqlite3 \
+  php${PIE_PHP_VERSION}-ssh2 \
+  php${PIE_PHP_VERSION}-tidy \
+  php${PIE_PHP_VERSION}-xml \
+  php${PIE_PHP_VERSION}-xmlrpc \
+  php${PIE_PHP_VERSION}-xsl \
+  php${PIE_PHP_VERSION}-zip \
   "
 
 ARG PHP_POOL_UID_MIN=9000
@@ -79,7 +80,7 @@ RUN set -xe \
         curl \
         lighttpd \
         ssmtp \
-        php7.1-fpm \
+        php${PIE_PHP_VERSION}-fpm \
         $PHP_MODULES \
         --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
@@ -92,8 +93,9 @@ RUN set -xe \
     && groupadd -r -g $HTTPD_GID pie-www-data \
     && useradd -N -r -g pie-www-data -s /usr/sbin/nologin -u $HTTPD_UID pie-www-data \
     && mkdir /var/empty \
-    && mkdir /run/php7.1-fpm.sock.d && chmod 0755 /run/php7.1-fpm.sock.d \
-    && rm /etc/php/7.1/fpm/pool.d/www.conf \
+    && mkdir /run/php${PIE_PHP_VERSION}-fpm.sock.d && chmod 0755 /run/php${PIE_PHP_VERSION}-fpm.sock.d \
+    && mkdir /run/php${PIE_PHP_VERSION}.d && chmod 0755 /run/php${PIE_PHP_VERSION}.d \
+    && rm /etc/php/${PIE_PHP_VERSION}/fpm/pool.d/www.conf \
     && useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent \
     && for pool_idx in $(seq $PHP_POOL_UID_MIN $PHP_POOL_UID_MAX); do \
         useradd -N -r -g users -s /usr/sbin/nologin -u $pool_idx pie-pool${pool_idx}; \
@@ -114,6 +116,9 @@ RUN set -xe \
 
 ENV PIE_EXP_MEMORY_SIZE 64
 ENV PIE_RES_MEMORY_SIZE 50
+
+ENV PIE_PHPPOOLS_INCLUDE_DIRS   "/etc/php/${PIE_PHP_VERSION}/fpm/pool.d:/etc/opt/pie/php${PIE_PHP_VERSION}/fpm/pool.d"
+ENV PIE_PHPPOOLS_LIST_FILE      "/run/php${PIE_PHP_VERSION}.d/pools.list"
 
 ENV LIGHTTPD_ADMIN_SUBNET   10.0.0.0/8
 
@@ -136,7 +141,7 @@ ENV PHP_REALPATH_CACHE_TTL              120
 # FPM settings
 ENV PHP_FCGI_MAX_REQUESTS   0
 
-VOLUME /etc/opt/pie/php7.1/fpm
+VOLUME /etc/opt/pie/php${PIE_PHP_VERSION}/fpm
 VOLUME /etc/ssmtp
 VOLUME /var/www
 

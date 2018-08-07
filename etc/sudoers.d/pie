@@ -1,6 +1,7 @@
-Defaults!/usr/local/bin/pie-entrypoint.sh   env_keep += "PIE_EXP_MEMORY_SIZE PIE_RES_MEMORY_SIZE PHP_MEMORY_LIMIT PHP_POST_MAX_SIZE PHP_UPLOAD_MAX_FILESIZE PHP_MAX_FILE_UPLOADS PHP_MAX_EXECUTION_TIME PHP_DATE_TIMEZONE"
+Defaults!/usr/local/bin/pie-entrypoint.sh   env_keep += "PIE_EXP_MEMORY_SIZE PIE_RES_MEMORY_SIZE PIE_PHP_VERSION LIGHTTPD_ADMIN_SUBNET PHP_MEMORY_LIMIT PHP_POST_MAX_SIZE PHP_UPLOAD_MAX_FILESIZE PHP_MAX_FILE_UPLOADS PHP_MAX_EXECUTION_TIME PHP_DATE_TIMEZONE"
 Defaults!/usr/local/bin/pie-entrypoint.sh   env_keep += "PHP_SESSION_SAVE_HANDLER PHP_SESSION_SAVE_PATH"
 Defaults!/usr/local/bin/pie-entrypoint.sh   env_keep += "PHP_OPCACHE_MEMORY_CONSUMPTION PHP_OPCACHE_REVALIDATE_FREQ PHP_OPCACHE_INTERNED_STRINGS_BUFFER PHP_OPCACHE_MAX_ACCELERATED_FILES PHP_REALPATH_CACHE_SIZE PHP_REALPATH_CACHE_TTL"
 Defaults!/usr/local/bin/pie-entrypoint.sh   env_keep += "PHP_FCGI_MAX_REQUESTS PHP_FCGI_MAX_CHILDREN"
 
-pie-agent    ALL = NOPASSWD: /usr/local/bin/pie-entrypoint.sh php-fpm7.1 -t *, /bin/kill -USR2 1
+pie-agent    ALL = NOPASSWD: /usr/local/bin/pie-entrypoint.sh php-fpm[57].[0-9] -t *, /bin/kill -USR2 1
+pie-agent    ALL = NOPASSWD: /usr/local/bin/pie-entrypoint.sh lighttpd -t *, /bin/kill -HUP *

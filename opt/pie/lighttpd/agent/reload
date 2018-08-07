@@ -40,6 +40,7 @@ use JSON;
 use Try::Tiny;
 
 $ENV{ 'PATH' } = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
+$ENV{ 'PIE_PHP_VERSION' } ||= '7.1';
 
 my $cgi = CGI->new;
 
@@ -48,15 +49,23 @@ my %data = (
 );
 try {
   my ($output, $res);
+  my $php_ver = $ENV{ 'PIE_PHP_VERSION' };
 
-  $res = run [qw#sudo /usr/local/bin/pie-entrypoint.sh php-fpm7.1 -t --fpm-config /etc/php/7.1/fpm/php-fpm.conf#], '>&', \$output, timeout( 60 );
-  $data{ 'configtest' } = $output;
-  die "configtest failed" unless $res;
+  $res = run [qw#sudo /usr/local/bin/pie-entrypoint.sh#, "php-fpm$php_ver", qw#-t --fpm-config# "/etc/php/$php_ver/fpm/php-fpm.conf"], '>&', \$output, timeout( 60 );
+  $data{ 'php_configtest' } = $output;
+  die "php configtest failed" unless $res;
+
+  $res = run [qw#sudo /usr/local/bin/pie-entrypoint.sh lighttpd -t -f /etc/lighttpd/lighttpd.conf#], '>&', \$output, timeout( 60 );
+  $data{ 'lighttpd_configtest' } = $output;
+  die "lighttpd configtest failed" unless $res;
 
   if ($cgi->request_method eq 'POST') {
     $res = run [qw#sudo kill -USR2 1#], '>&', \$output, timeout( 60 );
-    $data{ 'reload' } = $output;
+    $data{ 'php_reload' } = $output;
     die "reload failed" unless $res;
+
+    run [qw#sudo kill -HUP $(</run/lighttpd.pid)#], '>&', \$output, timeout( 60 );
+    $data{ 'lighttpd_reload' } = $output;
   }
 
   $data{ 'result' } = 'success';

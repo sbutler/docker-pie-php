@@ -35,6 +35,7 @@ set -e
 echoerr () { echo "$@" 1>&2; }
 
 php_envset () {
+  echoerr "PIE_PHP_VERSION: ${PIE_PHP_VERSION:=7.1}"
   echoerr "LIGHTTPD_ADMIN_SUBNET: ${LIGHTTPD_ADMIN_SUBNET:=10.0.0.0/8}"
 
   echoerr "PHP_MEMORY_LIMIT: ${PHP_MEMORY_LIMIT:=64M}"
@@ -105,12 +106,12 @@ php_envset () {
   export PHP_FCGI_MAX_CHILDREN
 
   # Read configuration variable file if it is present
-  if [[ -f /etc/default/php7.1-fpm ]]; then
-    . /etc/default/php7.1-fpm
+  if [[ -f /etc/default/php${PIE_PHP_VERSION}-fpm ]]; then
+    . /etc/default/php${PIE_PHP_VERSION}-fpm
   fi
 
-  PHP_CONF_PIDFILE=$(sed -n 's/^pid\s*=\s*//p' /etc/php/7.1/fpm/php-fpm.conf)
-  PHP_PIDFILE=${PHP_CONF_PIDFILE:-/run/php7.1-fpm.pid}
+  PHP_CONF_PIDFILE=$(sed -n 's/^pid\s*=\s*//p' /etc/php/${PIE_PHP_VERSION}/fpm/php-fpm.conf)
+  PHP_PIDFILE=${PHP_CONF_PIDFILE:-/run/php${PIE_PHP_VERSION}-fpm.pid}
 }
 
 if [[ "$1" == "php-pie" ]]; then
@@ -132,7 +133,7 @@ if [[ "$1" == "php-pie" ]]; then
   php_envset
 
   rm -f "$PHP_PIDFILE"
-  exec php-fpm7.1 --nodaemonize --force-stderr --fpm-config /etc/php/7.1/fpm/php-fpm.conf "$@"
+  exec php-fpm${PIE_PHP_VERSION} --nodaemonize --force-stderr --fpm-config /etc/php/${PIE_PHP_VERSION}/fpm/php-fpm.conf "$@"
 elif [[ "$1" == "php"* ]]; then
   php_envset
 
