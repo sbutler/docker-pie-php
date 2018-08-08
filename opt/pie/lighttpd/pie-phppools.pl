@@ -108,7 +108,7 @@ $connect
 HERE
     }
 
-    say STATUS_URLS $values->{ 'status' } if $values->{ 'status' };
+    printf STATUS_URLS "%s %s\n", $name, $values->{ 'status' } if $values->{ 'status' };
 }
 
 say ")";

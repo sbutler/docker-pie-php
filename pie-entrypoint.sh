@@ -138,7 +138,7 @@ if [[ "$1" == "php-pie" ]]; then
 
   rm -f "$PHP_PIDFILE"
   exec php-fpm${PIE_PHP_VERSION} --nodaemonize --force-stderr --fpm-config /etc/php/${PIE_PHP_VERSION}/fpm/php-fpm.conf "$@"
-elif [[ "$1" == "php"* || "$1" == "lighttpd" ]]; then
+elif [[ "$1" == "php"* || "$1" == "lighttpd" || "$1" == "pie-aws-metrics.py" ]]; then
   php_envset
 
   exec "$@"

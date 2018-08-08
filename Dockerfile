@@ -78,8 +78,8 @@ RUN set -xe \
     && apt-key add /tmp/sury-php.gpg && rm /tmp/sury-php.gpg \
     && apt-get update && apt-get install -y \
         curl \
-        libconfig-tiny-perl \
-        lighttpd \
+        lighttpd libconfig-tiny-perl \
+        python3 python3-pip python3-botocore python3-jmespath python3-requests \
         ssmtp \
         php${PIE_PHP_VERSION}-fpm \
         $PHP_MODULES \
@@ -89,7 +89,9 @@ RUN set -xe \
 COPY etc/ /etc
 COPY opt/ /opt
 COPY pie-entrypoint.sh /usr/local/bin/
-COPY pie-aws-metrics.sh /usr/local/bin/
+
+COPY pie-aws-metrics.py /usr/local/bin/
+RUN pip3 install boto3
 
 RUN set -xe \
     && groupadd -r -g $HTTPD_GID pie-www-data \
