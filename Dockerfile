@@ -78,6 +78,7 @@ RUN set -xe \
     && apt-key add /tmp/sury-php.gpg && rm /tmp/sury-php.gpg \
     && apt-get update && apt-get install -y \
         curl \
+        libconfig-tiny-perl \
         lighttpd \
         ssmtp \
         php${PIE_PHP_VERSION}-fpm \
@@ -88,13 +89,14 @@ RUN set -xe \
 COPY etc/ /etc
 COPY opt/ /opt
 COPY pie-entrypoint.sh /usr/local/bin/
+COPY pie-aws-metrics.sh /usr/local/bin/
 
 RUN set -xe \
     && groupadd -r -g $HTTPD_GID pie-www-data \
     && useradd -N -r -g pie-www-data -s /usr/sbin/nologin -u $HTTPD_UID pie-www-data \
     && mkdir /var/empty \
     && mkdir /run/php${PIE_PHP_VERSION}-fpm.sock.d && chmod 0755 /run/php${PIE_PHP_VERSION}-fpm.sock.d \
-    && mkdir /run/php${PIE_PHP_VERSION}.d && chmod 0755 /run/php${PIE_PHP_VERSION}.d \
+    && mkdir /run/php${PIE_PHP_VERSION}-fpm.d && chmod 0755 /run/php${PIE_PHP_VERSION}-fpm.d \
     && rm /etc/php/${PIE_PHP_VERSION}/fpm/pool.d/www.conf \
     && useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent \
     && for pool_idx in $(seq $PHP_POOL_UID_MIN $PHP_POOL_UID_MAX); do \
@@ -117,8 +119,8 @@ RUN set -xe \
 ENV PIE_EXP_MEMORY_SIZE 64
 ENV PIE_RES_MEMORY_SIZE 50
 
-ENV PIE_PHPPOOLS_INCLUDE_DIRS   "/etc/php/${PIE_PHP_VERSION}/fpm/pool.d:/etc/opt/pie/php${PIE_PHP_VERSION}/fpm/pool.d"
-ENV PIE_PHPPOOLS_LIST_FILE      "/run/php${PIE_PHP_VERSION}.d/pools.list"
+ENV PIE_PHPPOOLS_INCLUDE_DIRS       "/etc/php/${PIE_PHP_VERSION}/fpm/pool.d:/etc/opt/pie/php${PIE_PHP_VERSION}/fpm/pool.d"
+ENV PIE_PHPPOOLS_STATUSURLS_FILE    "/run/php${PIE_PHP_VERSION}-fpm.d/status-urls.txt"
 
 ENV LIGHTTPD_ADMIN_SUBNET   10.0.0.0/8
 

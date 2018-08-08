@@ -36,6 +36,9 @@ echoerr () { echo "$@" 1>&2; }
 
 php_envset () {
   echoerr "PIE_PHP_VERSION: ${PIE_PHP_VERSION:=7.1}"
+  echoerr "PIE_PHPPOOLS_INCLUDE_DIRS: ${PIE_PHPPOOLS_INCLUDE_DIRS:=/etc/php/${PIE_PHP_VERSION}/fpm/pool.d:/etc/opt/pie/php${PIE_PHP_VERSION}/fpm/pool.d}"
+  echoerr "PIE_PHPPOOLS_STATUSURLS_FILE: ${PIE_PHPPOOLS_STATUSURLS_FILE:=/run/php${PIE_PHP_VERSION}-fpm.d/status-urls.txt}"
+
   echoerr "LIGHTTPD_ADMIN_SUBNET: ${LIGHTTPD_ADMIN_SUBNET:=10.0.0.0/8}"
 
   echoerr "PHP_MEMORY_LIMIT: ${PHP_MEMORY_LIMIT:=64M}"
@@ -58,6 +61,7 @@ php_envset () {
   echoerr "PHP_FCGI_MAX_REQUESTS: ${PHP_FCGI_MAX_REQUESTS:=0}"
   echoerr "PHP_FCGI_MAX_CHILDREN (provided): ${PHP_FCGI_MAX_CHILDREN:=0}"
 
+  export PIE_PHP_VERSION PIE_PHPPOOLS_INCLUDE_DIRS PIE_PHPPOOLS_STATUSURLS_FILE LIGHTTPD_ADMIN_SUBNET
   export PHP_MEMORY_LIMIT PHP_POST_MAX_SIZE PHP_UPLOAD_MAX_FILESIZE PHP_MAX_FILE_UPLOADS PHP_MAX_EXECUTION_TIME PHP_DATE_TIMEZONE
   export PHP_SESSION_SAVE_HANDLER PHP_SESSION_SAVE_PATH
   export PHP_OPCACHE_MEMORY_CONSUMPTION PHP_OPCACHE_REVALIDATE_FREQ PHP_OPCACHE_INTERNED_STRINGS_BUFFER PHP_OPCACHE_MAX_ACCELERATED_FILES PHP_REALPATH_CACHE_SIZE PHP_REALPATH_CACHE_TTL
@@ -116,6 +120,7 @@ php_envset () {
 
 if [[ "$1" == "php-pie" ]]; then
   shift
+  php_envset
 
   (
     # Start lighttpd to get PHP-FPM ping healthchecks
@@ -130,11 +135,9 @@ if [[ "$1" == "php-pie" ]]; then
     lighttpd -f /etc/lighttpd/lighttpd.conf
   )
 
-  php_envset
-
   rm -f "$PHP_PIDFILE"
   exec php-fpm${PIE_PHP_VERSION} --nodaemonize --force-stderr --fpm-config /etc/php/${PIE_PHP_VERSION}/fpm/php-fpm.conf "$@"
-elif [[ "$1" == "php"* ]]; then
+elif [[ "$1" == "php"* || "$1" == "lighttpd" ]]; then
   php_envset
 
   exec "$@"

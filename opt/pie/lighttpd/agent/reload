@@ -51,11 +51,11 @@ try {
   my ($output, $res);
   my $php_ver = $ENV{ 'PIE_PHP_VERSION' };
 
-  $res = run [qw#sudo /usr/local/bin/pie-entrypoint.sh#, "php-fpm$php_ver", qw#-t --fpm-config# "/etc/php/$php_ver/fpm/php-fpm.conf"], '>&', \$output, timeout( 60 );
+  $res = run [qw#sudo /usr/local/bin/pie-entrypoint.sh#, "php-fpm$php_ver", qw#-t --fpm-config#, "/etc/php/$php_ver/fpm/php-fpm.conf"], '>&', \$output, timeout( 60 );
   $data{ 'php_configtest' } = $output;
   die "php configtest failed" unless $res;
 
-  $res = run [qw#sudo /usr/local/bin/pie-entrypoint.sh lighttpd -t -f /etc/lighttpd/lighttpd.conf#], '>&', \$output, timeout( 60 );
+  $res = run [qw#/usr/local/bin/pie-entrypoint.sh lighttpd -t -f /etc/lighttpd/lighttpd.conf#], '>&', \$output, timeout( 60 );
   $data{ 'lighttpd_configtest' } = $output;
   die "lighttpd configtest failed" unless $res;
 
@@ -64,7 +64,7 @@ try {
     $data{ 'php_reload' } = $output;
     die "reload failed" unless $res;
 
-    run [qw#sudo kill -HUP $(</run/lighttpd.pid)#], '>&', \$output, timeout( 60 );
+    run ['bash', '-c', 'kill -HUP $(</run/lighttpd.pid)'], '>&', \$output, timeout( 60 );
     $data{ 'lighttpd_reload' } = $output;
   }
 
