@@ -79,6 +79,7 @@ RUN set -xe \
     && apt-get update && apt-get install -y \
         curl \
         lighttpd libconfig-tiny-perl \
+        psmisc \
         python3 python3-pip python3-botocore python3-jmespath python3-requests \
         ssmtp \
         php${PIE_PHP_VERSION}-fpm \

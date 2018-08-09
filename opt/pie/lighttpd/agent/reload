@@ -64,7 +64,7 @@ try {
     $data{ 'php_reload' } = $output;
     die "reload failed" unless $res;
 
-    run ['bash', '-c', 'kill -HUP $(</run/lighttpd.pid)'], '>&', \$output, timeout( 60 );
+    run [qw#sudo killall -HUP lighttpd-angel#], '>&', \$output, timeout( 60 );
     $data{ 'lighttpd_reload' } = $output;
   }
 

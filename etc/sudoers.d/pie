@@ -7,3 +7,4 @@ Defaults!/usr/local/bin/pie-entrypoint.sh   env_keep += "PHP_FCGI_MAX_REQUESTS P
 Defaults:pie-agent !requiretty
 
 pie-agent    ALL = NOPASSWD: /usr/local/bin/pie-entrypoint.sh php-fpm[57].[0-9] -t *, /bin/kill -USR2 1
+pie-agent    ALL = NOPASSWD: /usr/bin/killall -HUP lighttpd-angel

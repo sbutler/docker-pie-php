@@ -4,6 +4,7 @@ use v5.10;
 use strict;
 
 use Config::Tiny;
+use File::Basename;
 use File::Spec::Functions;
 use Getopt::Long;
 
@@ -34,6 +35,8 @@ unless ($opt_statusurls_file) {
     exit 1;
 }
 
+my $opt_statusurls_dir = dirname( $opt_statusurls_file );
+
 
 my %pools;
 INCLUDE_DIR: foreach my $dir (@opt_includedirs) {
@@ -54,28 +57,31 @@ INCLUDE_DIR: foreach my $dir (@opt_includedirs) {
     }
 }
 
-open STATUS_URLS, '>', $opt_statusurls_file or die "cannot open $opt_statusurls_file: $!";
-if ($opt_user) {
-    my ($uid, $gid);
+my $statusurls_fh;
+if (((! -e $opt_statusurls_file) && -w $opt_statusurls_dir) || (-e $opt_statusurls_file && -w _)) {
+    open $statusurls_fh, '>', $opt_statusurls_file or die "cannot open $opt_statusurls_file: $!";
+    if ($opt_user) {
+        my ($uid, $gid);
 
-    if ($opt_user =~ /^\d+$/) {
-        $uid = $opt_user;
-    } else {
-        my @res = getpwnam($opt_user) or die "cannot find user $opt_user: $!";
-        $uid = $res[ 2 ];
-        $gid = $res[ 3 ];
-    }
-
-    if ($opt_group) {
-        if ($opt_group =~ /^\d+$/) {
-            $gid = $opt_group;
+        if ($opt_user =~ /^\d+$/) {
+            $uid = $opt_user;
         } else {
-            my @res = getgrnam($opt_group) or die "cannot find group $opt_group: $!";
-            $gid = $res[ 2 ];
+            my @res = getpwnam($opt_user) or die "cannot find user $opt_user: $!";
+            $uid = $res[ 2 ];
+            $gid = $res[ 3 ];
         }
-    }
 
-    chown $uid, $gid, $opt_statusurls_file;
+        if ($opt_group) {
+            if ($opt_group =~ /^\d+$/) {
+                $gid = $opt_group;
+            } else {
+                my @res = getgrnam($opt_group) or die "cannot find group $opt_group: $!";
+                $gid = $res[ 2 ];
+            }
+        }
+
+        chown $uid, $gid, $opt_statusurls_file;
+    }
 }
 say "fastcgi.server += (";
 
@@ -108,8 +114,8 @@ $connect
 HERE
     }
 
-    printf STATUS_URLS "%s %s\n", $name, $values->{ 'status' } if $values->{ 'status' };
+    printf $statusurls_fh "%s %s\n", $name, $values->{ 'status' } if $statusurls_fh && $values->{ 'status' };
 }
 
 say ")";
-close STATUS_URLS;
+close $statusurls_fh if $statusurls_fh;

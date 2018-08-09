@@ -133,12 +133,12 @@ if [[ "$1" == "php-pie" ]]; then
     LIGHTTPD_PIDFILE=${LIGHTTPD_CONF_PIDFILE:-/run/lighttpd.pid}
 
     rm -f "$LIGHTTPD_PIDFILE"
-    lighttpd -f /etc/lighttpd/lighttpd.conf
+    lighttpd-angel -D -f /etc/lighttpd/lighttpd.conf &
   )
 
   rm -f "$PHP_PIDFILE"
   exec php-fpm${PIE_PHP_VERSION} --nodaemonize --force-stderr --fpm-config /etc/php/${PIE_PHP_VERSION}/fpm/php-fpm.conf "$@"
-elif [[ "$1" == "php"* || "$1" == "lighttpd" || "$1" == "pie-aws-metrics.py" ]]; then
+elif [[ "$1" == "php"* || "$1" == "lighttpd"* || "$1" == "pie-aws-metrics.py" ]]; then
   php_envset
 
   exec "$@"
