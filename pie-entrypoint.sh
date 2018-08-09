@@ -133,8 +133,13 @@ if [[ "$1" == "php-pie" ]]; then
     LIGHTTPD_PIDFILE=${LIGHTTPD_CONF_PIDFILE:-/run/lighttpd.pid}
 
     rm -f "$LIGHTTPD_PIDFILE"
-    lighttpd-angel -D -f /etc/lighttpd/lighttpd.conf &
+    setsid lighttpd-angel -D -f /etc/lighttpd/lighttpd.conf &
   )
+  if [[ -n $PHP_AWS_METRICS_LOGGROUP_NAME ]]; then
+      set +e
+      setsid pie-aws-metrics.py 1>&2 &
+      set -e
+  fi
 
   rm -f "$PHP_PIDFILE"
   exec php-fpm${PIE_PHP_VERSION} --nodaemonize --force-stderr --fpm-config /etc/php/${PIE_PHP_VERSION}/fpm/php-fpm.conf "$@"
