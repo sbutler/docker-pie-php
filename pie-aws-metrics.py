@@ -26,9 +26,8 @@ class PHPPool(object):
     """ Gathers and tracks the status of a PHP pool. """
     def __init__(self, name, status_urlpath):
         self._name = name
+        self._start_time = 0
         self._status_urlpath = status_urlpath
-        self._status_prev = defaultdict(lambda: 0)
-        self._status_curr = defaultdict(lambda: 0)
 
     def __str__(self):
         return self._name
@@ -43,6 +42,12 @@ class PHPPool(object):
         r.raise_for_status()
 
         result = r.json()
+        if result.get('start time', 0) != self._start_time:
+            # PHP was restarted; clear our previous values
+            self._status_prev = defaultdict(lambda: 0)
+            self._start_time = result['start time']
+
+        self._status_curr = defaultdict(lambda: 0)
         for key in ('accepted conn', 'max children reached', 'slow requests'):
             self._status_curr[key] = result.get(key, 0)
             result['delta ' + key] = self._status_curr[key] - self._status_prev[key]
@@ -50,6 +55,8 @@ class PHPPool(object):
         return result
 
     def update_status(self):
+        if not self._status_curr:
+            raise ValueError('current status values are invalid')
         self._status_prev = self._status_curr
         self._status_curr = defaultdict(lambda: 0)
 
