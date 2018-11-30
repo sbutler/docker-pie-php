@@ -29,7 +29,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH
 # THE SOFTWARE.
-FROM sbutler/pie-base
+FROM sbutler/pie-base:latest-ubuntu18.04
 
 ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
@@ -66,17 +66,14 @@ ARG PHP_MODULES="\
 ARG PHP_POOL_UID_MIN=9000
 ARG PHP_POOL_UID_MAX=9100
 
-COPY sury-php.gpg /tmp
-
 RUN set -xe \
-    && apt-get update && apt-get install -y \
+    && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update && apt-get install -y --no-install-recommends \
         apt-transport-https \
         ca-certificates \
-        --no-install-recommends \
-    && echo "deb https://packages.sury.org/php/ jessie main" >> /etc/apt/sources.list.d/sury-php.list \
-    && echo "deb-src https://packages.sury.org/php/ jessie main" >> /etc/apt/sources.list.d/sury-php.list \
-    && apt-key add /tmp/sury-php.gpg && rm /tmp/sury-php.gpg \
-    && apt-get update && apt-get install -y \
+        software-properties-common \
+    && add-apt-repository ppa:ondrej/php \
+    && apt-get update && apt-get install -y --no-install-recommends \
         curl \
         lighttpd libconfig-tiny-perl \
         psmisc \
@@ -84,7 +81,7 @@ RUN set -xe \
         ssmtp \
         php${PIE_PHP_VERSION}-fpm \
         $PHP_MODULES \
-        --no-install-recommends \
+    && rm /etc/php/${PIE_PHP_VERSION}/fpm/pool.d/www.conf \
     && rm -rf /var/lib/apt/lists/*
 
 COPY etc/ /etc
@@ -92,24 +89,22 @@ COPY opt/ /opt
 COPY pie-entrypoint.sh /usr/local/bin/
 
 COPY pie-aws-metrics.py /usr/local/bin/
-RUN pip3 install boto3
+RUN pip3 install --no-cache-dir boto3
 
-RUN set -xe \
-    && groupadd -r -g $HTTPD_GID pie-www-data \
-    && useradd -N -r -g pie-www-data -s /usr/sbin/nologin -u $HTTPD_UID pie-www-data \
-    && mkdir /var/empty \
-    && mkdir /run/php${PIE_PHP_VERSION}-fpm.sock.d && chmod 0755 /run/php${PIE_PHP_VERSION}-fpm.sock.d \
-    && mkdir /run/php${PIE_PHP_VERSION}-fpm.d && chmod 0755 /run/php${PIE_PHP_VERSION}-fpm.d \
-    && rm /etc/php/${PIE_PHP_VERSION}/fpm/pool.d/www.conf \
-    && useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent \
-    && for pool_idx in $(seq $PHP_POOL_UID_MIN $PHP_POOL_UID_MAX); do \
+RUN groupadd -r -g $HTTPD_GID pie-www-data
+RUN useradd -N -r -g pie-www-data -s /usr/sbin/nologin -u $HTTPD_UID pie-www-data
+RUN mkdir /var/empty
+RUN mkdir /run/php${PIE_PHP_VERSION}-fpm.sock.d && chmod 0755 /run/php${PIE_PHP_VERSION}-fpm.sock.d
+RUN mkdir /run/php${PIE_PHP_VERSION}-fpm.d && chmod 0755 /run/php${PIE_PHP_VERSION}-fpm.d
+RUN useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent
+RUN set -xe; for pool_idx in $(seq $PHP_POOL_UID_MIN $PHP_POOL_UID_MAX); do \
         useradd -N -r -g users -s /usr/sbin/nologin -u $pool_idx pie-pool${pool_idx}; \
         mkdir /tmp/php.pie-pool${pool_idx}; \
         chown pie-pool${pool_idx}:users /tmp/php.pie-pool${pool_idx}; \
         chmod u=rwx,g=,o= /tmp/php.pie-pool${pool_idx}; \
-       done \
-    && lighttpd-enable-mod fastcgi \
-    && lighttpd-enable-mod pie-agent
+    done
+RUN lighttpd-enable-mod fastcgi
+RUN lighttpd-enable-mod pie-agent
 
 COPY pie-dynamodb-sessions/ /usr/local/share/pie-dynamodb-sessions/
 
@@ -146,10 +141,7 @@ ENV PHP_OPCACHE_MEMORY_CONSUMPTION=64 \
 ENV PHP_FCGI_MAX_REQUESTS=0
 
 VOLUME /etc/opt/pie/php${PIE_PHP_VERSION}/fpm
-VOLUME /etc/ssmtp
-VOLUME /run/php${PIE_PHP_VERSION}-fpm.sock.d
-VOLUME /run/php${PIE_PHP_VERSION}-fpm.d
-VOLUME /var/www
+VOLUME /run/php${PIE_PHP_VERSION}-fpm.sock.d /run/php${PIE_PHP_VERSION}-fpm.d
 
 EXPOSE 9000-10000
 EXPOSE 8008

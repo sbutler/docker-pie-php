@@ -85,7 +85,7 @@ php_envset () {
         ram_limit=$(echo "$ram_limit" | awk '{ print int( $1 / 1048576 ) }')
       fi
     fi
-    (( ram_limit <= 0 )) && ram_limit=$(free -mo | awk '/^Mem:/ { print $4 + $6 + $7 }')
+    (( ram_limit <= 0 )) && ram_limit=$(free -m | awk '/^Mem:/ { print $4 + $6 + $7 }')
 
     echoerr "exp_memory_size: $exp_memory_size MB"
     echoerr "res_memory_size: $res_memory_size MB"
