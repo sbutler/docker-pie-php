@@ -1,0 +1,85 @@
+#!/usr/bin/env perl
+# Copyright (c) 2019 University of Illinois Board of Trustees
+# All rights reserved.
+#
+# Developed by:         Technology Services
+#                       University of Illinois at Urbana-Champaign
+#                       https://techservices.illinois.edu/
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# with the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+#      * Redistributions of source code must retain the above copyright notice,
+#        this list of conditions and the following disclaimers.
+#      * Redistributions in binary form must reproduce the above copyright notice,
+#        this list of conditions and the following disclaimers in the
+#        documentation and/or other materials provided with the distribution.
+#      * Neither the names of Technology Services, University of Illinois at
+#        Urbana-Champaign, nor the names of its contributors may be used to
+#        endorse or promote products derived from this Software without specific
+#        prior written permission.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH
+# THE SOFTWARE.
+
+use warnings;
+use strict;
+
+use CGI;
+use IPC::Run qw/run timeout/;
+use JSON;
+use Try::Tiny;
+
+$ENV{ 'PATH' } = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
+$ENV{ 'PIE_PHP_VERSION' } ||= '7.1';
+$ENV{ 'PHP_LOGGING' } ||= '';
+
+my $cgi = CGI->new;
+
+my $error_code = '500 Internal Server Error';
+my %data = (
+  result    => 'unknown',
+);
+try {
+  my ($output, $res);
+  my $php_ver = $ENV{ 'PIE_PHP_VERSION' };
+
+  if ($ENV{ 'PHP_LOGGING' } ne 'file') {
+      $error_code = '501 Not Implemented';
+      die "logrotate is only valid for file logging";
+  }
+
+  $res = run [qw#sudo /usr/local/bin/pie-entrypoint.sh#, "php-fpm$php_ver", qw#-t --fpm-config#, "/etc/php/$php_ver/fpm/php-fpm.conf"], '>&', \$output, timeout( 60 );
+  $data{ 'php_configtest' } = $output;
+  die "php configtest failed" unless $res;
+
+  $res = run [qw#/usr/local/bin/pie-entrypoint.sh lighttpd -t -f /etc/lighttpd/lighttpd.conf#], '>&', \$output, timeout( 60 );
+  $data{ 'lighttpd_configtest' } = $output;
+  die "lighttpd configtest failed" unless $res;
+
+  if ($cgi->request_method eq 'POST') {
+      $res = run [qw#sudo /etc/cron.daily/logrotate#], '>&', \$output, timeout( 120 );
+      $data{ 'logrotate' } = $output;
+      die "logrotate failed" unless $res;
+  }
+
+  $data{ 'result' } = 'success';
+} catch {
+  $data{ 'result' } = 'error';
+  $data{ 'error' } = $_;
+};
+
+print $cgi->header(
+  -type       => 'application/json',
+  -status     => ($data{ 'result' } eq 'success' ? '200 OK' : $error_code),
+);
+print encode_json( \%data );
