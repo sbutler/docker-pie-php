@@ -125,7 +125,11 @@ INCLUDE_DIR: foreach my $dir (@opt_includedirs) {
 
             my $add_logfile = sub {
                 my $file = shift;
-                return unless $file;
+
+                unless ($file) {
+                    say "[INFO] no file specified for $section entry";
+                    return;
+                }
 
                 if (dirname( $file ) ne $opt_logdir) {
                     say "[WARN] $file is not in the log directory (skipping)";
@@ -137,6 +141,7 @@ INCLUDE_DIR: foreach my $dir (@opt_includedirs) {
                     return;
                 }
 
+                say "[INFO] adding $file for pool";
                 $logfiles{ $file } = {
                     owner   => $pool_uid,
                     group   => $pool_gid,
@@ -181,7 +186,8 @@ if ($opt_logtype eq 'pipe') {
     unlink $opt_logrotate;
 } elsif ($opt_logtype eq 'file') {
     my @postrotate;
-    FILE_LOGFILE: while (my ($file, $perms) = each %logfiles) {
+    FILE_LOGFILE: for my $file (sort keys %logfiles) {
+        my $perms = $logfiles{ $file };
         if (-e $file && ! -f _) {
             say "[WARN] Removing existing file $file";
             unlink $file;
@@ -207,7 +213,7 @@ if ($opt_logtype eq 'pipe') {
     }
 
     if (open my $fh, '>', $opt_logrotate) {
-        my $files = join( ' ', map { sprintf '"%s"', $_ } keys %logfiles);
+        my $files = join( ' ', map { sprintf '"%s"', $_ } sort keys %logfiles);
         my $postrotate = join( "; \\\n        ", @postrotate );
 
         say $fh <<"EOF";

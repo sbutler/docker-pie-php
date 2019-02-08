@@ -92,7 +92,7 @@ if (((! -e $opt_statusurls_file) && -w $opt_statusurls_dir) || (-e $opt_statusur
 }
 say "fastcgi.server += (";
 
-POOL: foreach my $name (keys %pools) {
+POOL: foreach my $name (sort keys %pools) {
     my $values = $pools{ $name };
 
     my $connect;
