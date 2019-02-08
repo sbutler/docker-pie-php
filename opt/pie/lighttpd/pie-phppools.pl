@@ -9,7 +9,7 @@ use File::Spec::Functions;
 use Getopt::Long;
 
 my $opt_includedirs = $ENV{ 'PIE_PHPPOOLS_INCLUDE_DIRS' };
-my $opt_statusurls_file = $ENV{ 'PIE_PHPPOOLS_STATUSURLS_FILE' };
+my $opt_statusurls_file = $ENV{ 'PIE_PHPPOOLS_STATUSURLS_FILE' } || catfile( '/run', 'php-fpm.d', 'status-urls.txt' );
 my $opt_user;
 my $opt_group;
 
@@ -18,9 +18,6 @@ if (not $opt_includedirs && $ENV{ 'PIE_PHP_VERSION' }) {
         catdir( '/etc', 'php', $ENV{ 'PIE_PHP_VERSION' }, 'fpm', 'pool.d' ),
         catdir( '/etc', 'opt', 'pie', 'php', $ENV{ 'PIE_PHP_VERSION' }, 'fpm', 'pool.d' )
     );
-}
-if (not $opt_statusurls_file && $ENV{ 'PIE_PHP_VERSION' }) {
-    $opt_statusurls_file = catfile( '/run', 'php' . $ENV{ 'PIE_PHP_VERSION' } . '-fpm.d', 'status-urls.txt' );
 }
 
 unless (GetOptions(

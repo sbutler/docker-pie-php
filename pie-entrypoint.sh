@@ -37,8 +37,8 @@ echoerr () { echo "$@" 1>&2; }
 php_envset () {
   echoerr "PIE_PHP_VERSION: ${PIE_PHP_VERSION:=7.1}"
   echoerr "PIE_PHPPOOLS_INCLUDE_DIRS: ${PIE_PHPPOOLS_INCLUDE_DIRS:=/etc/php/${PIE_PHP_VERSION}/fpm/pool.d:/etc/opt/pie/php${PIE_PHP_VERSION}/fpm/pool.d}"
-  echoerr "PIE_PHPPOOLS_STATUSURLS_FILE: ${PIE_PHPPOOLS_STATUSURLS_FILE:=/run/php${PIE_PHP_VERSION}-fpm.d/status-urls.txt}"
-  echoerr "PIE_PHPPOOLS_LOG_DIR: ${PIE_PHPPOOLS_LOG_DIR:=/var/log/php${PIE_PHP_VERSION}-fpm}"
+  echoerr "PIE_PHPPOOLS_STATUSURLS_FILE: ${PIE_PHPPOOLS_STATUSURLS_FILE:=/run/php-fpm.d/status-urls.txt}"
+  echoerr "PIE_PHPPOOLS_LOG_DIR: ${PIE_PHPPOOLS_LOG_DIR:=/var/log/php-fpm}"
 
   echoerr "LIGHTTPD_ADMIN_SUBNET: ${LIGHTTPD_ADMIN_SUBNET:=10.0.0.0/8}"
 
@@ -118,7 +118,7 @@ php_envset () {
   fi
 
   PHP_CONF_PIDFILE=$(sed -n 's/^pid\s*=\s*//p' /etc/php/${PIE_PHP_VERSION}/fpm/php-fpm.conf)
-  PHP_PIDFILE=${PHP_CONF_PIDFILE:-/run/php${PIE_PHP_VERSION}-fpm.pid}
+  PHP_PIDFILE=${PHP_CONF_PIDFILE:-/run/php-fpm.pid}
 }
 
 if [[ "$1" == "php-pie" ]]; then

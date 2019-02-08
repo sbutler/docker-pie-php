@@ -11,21 +11,15 @@ use Getopt::Long;
 use POSIX qw/mkfifo/;
 
 my $opt_includedirs = $ENV{ 'PIE_PHPPOOLS_INCLUDE_DIRS' };
-my $opt_logdir = $ENV{ 'PIE_PHPPOOLS_LOG_DIR' };
-my $opt_logtype = $ENV{ 'PHP_LOGGING' };
-my $opt_logrotate;
+my $opt_logdir = $ENV{ 'PIE_PHPPOOLS_LOG_DIR' } || catdir( '/var', 'log', 'php-fpm' );
+my $opt_logtype = $ENV{ 'PHP_LOGGING' } || '';
+my $opt_logrotate = catfile( '/etc', 'logrotate.d', 'php-fpm' );
 
 if (not $opt_includedirs && $ENV{ 'PIE_PHP_VERSION' }) {
     $opt_includedirs = join( ':',
         catdir( '/etc', 'php', $ENV{ 'PIE_PHP_VERSION' }, 'fpm', 'pool.d' ),
         catdir( '/etc', 'opt', 'pie', 'php', $ENV{ 'PIE_PHP_VERSION' }, 'fpm', 'pool.d' )
     );
-}
-if (not $opt_logdir && $ENV{ 'PIE_PHP_VERSION' }) {
-    $opt_logdir = catdir( '/var', 'log', 'php' . $ENV{ 'PIE_PHP_VERSION' } . '-fpm' );
-}
-if ($ENV{ 'PIE_PHP_VERSION' }) {
-    $opt_logrotate = catfile( '/etc', 'logrotate.d', 'php' . $ENV{ 'PIE_PHP_VERSION' } . '-fpm' );
 }
 
 unless (GetOptions(
@@ -74,7 +68,14 @@ my $def_gid;
 }
 say "[INFO] default uid = $def_uid; gid = $def_gid; mode = $def_mod";
 
-my %logfiles;
+my %logfiles = (
+    # Add this for all pools to use if wanted
+    catfile( $opt_logdir, 'access.log' ) => {
+        owner   => $def_uid,
+        group   => $def_gid,
+        mode    => $def_mod,
+    }
+);
 INCLUDE_DIR: foreach my $dir (@opt_includedirs) {
     my $pattern = sprintf( '"%s"', catfile( $dir, "*.conf" ) );
     CONF_FILE: foreach my $file (glob $pattern) {

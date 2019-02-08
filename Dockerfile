@@ -95,9 +95,9 @@ RUN pip3 install --no-cache-dir boto3
 RUN groupadd -r -g $HTTPD_GID pie-www-data
 RUN useradd -N -r -g pie-www-data -s /usr/sbin/nologin -u $HTTPD_UID pie-www-data
 RUN mkdir /var/empty
-RUN mkdir /run/php${PIE_PHP_VERSION}-fpm.sock.d && chmod 0755 /run/php${PIE_PHP_VERSION}-fpm.sock.d
-RUN mkdir /run/php${PIE_PHP_VERSION}-fpm.d && chmod 0755 /run/php${PIE_PHP_VERSION}-fpm.d
-RUN mkdir /var/log/php${PIE_PHP_VERSION}-fpm && chmod 0755 /var/log/php${PIE_PHP_VERSION}-fpm
+RUN mkdir /run/php-fpm.sock.d && chmod 0755 /run/php-fpm.sock.d
+RUN mkdir /run/php-fpm.d && chmod 0755 /run/php-fpm.d
+RUN mkdir /var/log/php-fpm && chmod 0755 /var/log/php-fpm
 RUN useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent
 RUN set -xe; for pool_idx in $(seq $PHP_POOL_UID_MIN $PHP_POOL_UID_MAX); do \
         useradd -N -r -g users -s /usr/sbin/nologin -u $pool_idx pie-pool${pool_idx}; \
@@ -119,8 +119,8 @@ RUN set -xe \
 ENV PIE_EXP_MEMORY_SIZE=64 \
     PIE_RES_MEMORY_SIZE=50 \
     PIE_PHPPOOLS_INCLUDE_DIRS="/etc/php/${PIE_PHP_VERSION}/fpm/pool.d:/etc/opt/pie/php${PIE_PHP_VERSION}/fpm/pool.d" \
-    PIE_PHPPOOLS_STATUSURLS_FILE="/run/php${PIE_PHP_VERSION}-fpm.d/status-urls.txt" \
-    PIE_PHPPOOLS_LOG_DIR="/var/log/php${PIE_PHP_VERSION}-fpm"
+    PIE_PHPPOOLS_STATUSURLS_FILE="/run/php-fpm.d/status-urls.txt" \
+    PIE_PHPPOOLS_LOG_DIR="/var/log/php-fpm"
 
 ENV LIGHTTPD_ADMIN_SUBNET=10.0.0.0/8
 
@@ -145,8 +145,8 @@ ENV PHP_OPCACHE_MEMORY_CONSUMPTION=64 \
 ENV PHP_FCGI_MAX_REQUESTS=0
 
 VOLUME /etc/opt/pie/php${PIE_PHP_VERSION}/fpm
-VOLUME /run/php${PIE_PHP_VERSION}-fpm.sock.d /run/php${PIE_PHP_VERSION}-fpm.d
-VOLUME /var/log/php${PIE_PHP_VERSION}-fpm
+VOLUME /run/php-fpm.sock.d /run/php-fpm.d
+VOLUME /var/log/php-fpm
 
 EXPOSE 9000-10000
 EXPOSE 8008
