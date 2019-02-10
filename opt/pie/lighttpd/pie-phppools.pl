@@ -10,6 +10,7 @@ use Getopt::Long;
 
 my $opt_includedirs = $ENV{ 'PIE_PHPPOOLS_INCLUDE_DIRS' };
 my $opt_statusurls_file = $ENV{ 'PIE_PHPPOOLS_STATUSURLS_FILE' } || catfile( '/run', 'php-fpm.d', 'status-urls.txt' );
+my $opt_pingurls_file = $ENV{ 'PIE_PHPPOOLS_PINGURLS_FILE' } || catfile( '/run', 'php-fpm.d', 'ping-urls.txt' );
 my $opt_user;
 my $opt_group;
 
@@ -23,11 +24,12 @@ if (not $opt_includedirs && $ENV{ 'PIE_PHP_VERSION' }) {
 unless (GetOptions(
     'include-dirs|i=s'      => \$opt_includedirs,
     'status-urls-file|s=s'  => \$opt_statusurls_file,
+    'ping-urls-file|p=s'    => \$opt_pingurls_file,
     'user|u=s'              => \$opt_user,
     'group|g=s'             => \$opt_group,
 )) {
-    say STDERR "usage: [-i INCLUDE_DIRS] [-s STATUS_URLS_FILE]";
-    say STDERR "Parses the PHP-FPM pool configurations and outputs an lighttpd configuration and list of pools.";
+    say STDERR "usage: [-i INCLUDE_DIRS] [-s STATUS_URLS_FILE] [-p PING_URLS_FILE]";
+    say STDERR "Parses the PHP-FPM pool configurations and outputs an lighttpd configuration and list of pool status and ping URLs.";
     exit 1;
 }
 
@@ -41,9 +43,10 @@ unless ($opt_statusurls_file) {
     say STDERR "STATUS_URLS_FILE is required";
     exit 1;
 }
-
-my $opt_statusurls_dir = dirname( $opt_statusurls_file );
-
+unless ($opt_pingurls_file) {
+    say STDERR "PING_URLS_FILE is required";
+    exit 1;
+}
 
 my %pools;
 INCLUDE_DIR: foreach my $dir (@opt_includedirs) {
@@ -64,9 +67,16 @@ INCLUDE_DIR: foreach my $dir (@opt_includedirs) {
     }
 }
 
-my $statusurls_fh;
-if (((! -e $opt_statusurls_file) && -w $opt_statusurls_dir) || (-e $opt_statusurls_file && -w _)) {
-    open $statusurls_fh, '>', $opt_statusurls_file or die "cannot open $opt_statusurls_file: $!";
+sub open_urls(*$) {
+    my $file = $_[ 1 ];
+
+    my $dir = dirname( $file );
+    unless (((! -e $file) && -w $dir) || (-e $file && -w _)) {
+        say STDERR "cannot open $file or write to directory $dir";
+        return;
+    }
+
+    open $_[ 0 ], '>', $file or die "cannot open $file: $!";
     if ($opt_user) {
         my ($uid, $gid);
 
@@ -87,9 +97,15 @@ if (((! -e $opt_statusurls_file) && -w $opt_statusurls_dir) || (-e $opt_statusur
             }
         }
 
-        chown $uid, $gid, $opt_statusurls_file;
+        chown $uid, $gid, $file;
     }
 }
+
+my ($statusurls_fh, $pingurls_fh);
+open_urls $statusurls_fh, $opt_statusurls_file;
+open_urls $pingurls_fh, $opt_pingurls_file;
+
+
 say "fastcgi.server += (";
 
 POOL: foreach my $name (sort keys %pools) {
@@ -122,7 +138,9 @@ HERE
     }
 
     printf $statusurls_fh "%s %s\n", $name, $values->{ 'status' } if $statusurls_fh && $values->{ 'status' };
+    printf $pingurls_fh "%s %s\n", $name, $values->{ 'ping' } if $pingurls_fh && $values->{ 'ping' };
 }
 
 say ")";
 close $statusurls_fh if $statusurls_fh;
+close $pingurls_fh if $pingurls_fh;
