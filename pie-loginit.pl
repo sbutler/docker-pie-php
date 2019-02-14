@@ -214,7 +214,7 @@ if ($opt_logtype eq 'pipe') {
 
     if (open my $fh, '>', $opt_logrotate) {
         my $files = join( ' ', map { sprintf '"%s"', $_ } sort keys %logfiles);
-        my $postrotate = join( "; \\\n        ", @postrotate );
+        my $postrotate = join( "\n        ", @postrotate );
 
         say $fh <<"EOF";
 ${files} {
@@ -225,16 +225,15 @@ ${files} {
     create 640 root adm
     sharedscripts
     postrotate
-        ${postrotate}; \\
-        \\
-        kill -USR1 1;
+        ${postrotate}
+        kill -USR1 1
     endscript
     prerotate
-        for f in "\$1"; do \\
-            if [ -L "\$f" -o ! -f "\$f" ]; then \\
-                exit 1; \\
-            fi; \\
-        done;
+        for f in ${files}; do
+            if [ -L "\$f" -o ! -f "\$f" ]; then
+                exit 1
+            fi
+        done
     endscript
 }
 EOF

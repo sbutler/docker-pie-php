@@ -82,6 +82,7 @@ RUN set -xe \
         php${PIE_PHP_VERSION}-fpm \
         $PHP_MODULES \
     && rm /etc/php/${PIE_PHP_VERSION}/fpm/pool.d/www.conf \
+    && rm /etc/logrotate.d/php${PIE_PHP_VERSION}-fpm \
     && rm -rf /var/lib/apt/lists/*
 
 COPY etc/ /etc
