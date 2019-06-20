@@ -33,7 +33,7 @@ FROM sbutler/pie-base:latest-ubuntu18.04
 
 ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
-ENV PIE_PHP_VERSION 7.1
+ENV PIE_PHP_VERSION 7.2
 
 ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-bcmath \
@@ -45,7 +45,6 @@ ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-intl \
   php${PIE_PHP_VERSION}-ldap \
   php${PIE_PHP_VERSION}-mbstring \
-  php${PIE_PHP_VERSION}-mcrypt \
   php${PIE_PHP_VERSION}-memcached \
   php${PIE_PHP_VERSION}-mysqlnd \
   php${PIE_PHP_VERSION}-oauth \
