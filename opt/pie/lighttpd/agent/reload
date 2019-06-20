@@ -40,7 +40,7 @@ use JSON;
 use Try::Tiny;
 
 $ENV{ 'PATH' } = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
-$ENV{ 'PIE_PHP_VERSION' } ||= '7.2';
+$ENV{ 'PIE_PHP_VERSION' } ||= '7.3';
 
 my $cgi = CGI->new;
 
