@@ -197,7 +197,8 @@ def run():
     logstream_name = METRICS_LOGSTREAM_NAME
     if not logstream_name:
         if ECS_CONTAINER_METADATA_FILE:
-            logstream_name = get_ecs_metadata()['containerId']
+            ecs_metadata = get_ecs_metadata()
+            logstream_name = '{cluster}/{containerId}'.format(**ecs_metadata)
         else:
             logstream_name = socket.gethostname()
 
