@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 logs_clnt = boto3.client('logs')
 
-ECS_TASKID_RE = re.compile(r'^.+:task/(?P<id>.+)$')
+ECS_TASKID_RE = re.compile(r'^.+:task/(?:(?P<cluster>[a-zA-Z0-9-]+)/)?(?P<id>.+)$')
 
 AGENT_HOST = os.environ.get('PHP_AWS_AGENT_HOST', 'localhost:8008')
 ECS_CONTAINER_METADATA_FILE = os.environ.get('ECS_CONTAINER_METADATA_FILE', None)
