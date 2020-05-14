@@ -98,7 +98,7 @@ RUN mkdir /var/empty
 RUN mkdir /run/php-fpm.sock.d && chmod 0755 /run/php-fpm.sock.d
 RUN mkdir /run/php-fpm.d && chmod 0755 /run/php-fpm.d
 RUN mkdir /var/log/php-fpm && chmod 0755 /var/log/php-fpm
-RUN useradd -N -r -g users -s /usr/sbin/nologin -u 8000 pie-agent
+RUN useradd -N -r -g users -G pie-www-data -s /usr/sbin/nologin -u 8000 pie-agent
 RUN set -xe; for pool_idx in $(seq $PHP_POOL_UID_MIN $PHP_POOL_UID_MAX); do \
         useradd -N -r -g users -s /usr/sbin/nologin -u $pool_idx pie-pool${pool_idx}; \
         mkdir /tmp/php.pie-pool${pool_idx}; \
