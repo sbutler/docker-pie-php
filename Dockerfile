@@ -149,7 +149,7 @@ VOLUME /run/php-fpm.sock.d /run/php-fpm.d
 VOLUME /var/log/php-fpm
 
 EXPOSE 9000-10000
-EXPOSE 8008
+EXPOSE 8009
 
 ENTRYPOINT ["/usr/local/bin/pie-entrypoint.sh"]
 CMD ["php-pie"]
