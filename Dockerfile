@@ -42,7 +42,6 @@ ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-dba \
   php${PIE_PHP_VERSION}-ds \
   php${PIE_PHP_VERSION}-gd \
-  php${PIE_PHP_VERSION}-geoip \
   php${PIE_PHP_VERSION}-http \
   php${PIE_PHP_VERSION}-igbinary \
   php${PIE_PHP_VERSION}-intl \
@@ -56,6 +55,7 @@ ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-opcache \
   php${PIE_PHP_VERSION}-pgsql \
   php${PIE_PHP_VERSION}-pspell aspell-en \
+  php${PIE_PHP_VERSION}-raphf \
   php${PIE_PHP_VERSION}-redis \
   php${PIE_PHP_VERSION}-soap \
   php${PIE_PHP_VERSION}-sqlite3 \
