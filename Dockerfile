@@ -54,6 +54,7 @@ ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-odbc \
   php${PIE_PHP_VERSION}-opcache \
   php${PIE_PHP_VERSION}-pgsql \
+  php${PIE_PHP_VERSION}-propro \
   php${PIE_PHP_VERSION}-pspell aspell-en \
   php${PIE_PHP_VERSION}-raphf \
   php${PIE_PHP_VERSION}-redis \
