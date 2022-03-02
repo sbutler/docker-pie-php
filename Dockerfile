@@ -29,7 +29,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH
 # THE SOFTWARE.
-FROM sbutler/pie-base:latest-ubuntu18.04
+FROM publish/pie-base:latest-ubuntu20.04
 
 ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
@@ -40,15 +40,20 @@ ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-bz2 \
   php${PIE_PHP_VERSION}-curl \
   php${PIE_PHP_VERSION}-dba \
+  php${PIE_PHP_VERSION}-ds \
   php${PIE_PHP_VERSION}-gd \
+  php${PIE_PHP_VERSION}-geoip \
+  php${PIE_PHP_VERSION}-http \
   php${PIE_PHP_VERSION}-igbinary \
   php${PIE_PHP_VERSION}-intl \
   php${PIE_PHP_VERSION}-ldap \
   php${PIE_PHP_VERSION}-mbstring \
   php${PIE_PHP_VERSION}-memcached \
+  php${PIE_PHP_VERSION}-mongodb \
   php${PIE_PHP_VERSION}-mysqlnd \
   php${PIE_PHP_VERSION}-oauth \
   php${PIE_PHP_VERSION}-odbc \
+  php${PIE_PHP_VERSION}-opcache \
   php${PIE_PHP_VERSION}-pgsql \
   php${PIE_PHP_VERSION}-pspell aspell-en \
   php${PIE_PHP_VERSION}-redis \
@@ -56,24 +61,27 @@ ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-sqlite3 \
   php${PIE_PHP_VERSION}-ssh2 \
   php${PIE_PHP_VERSION}-tidy \
+  php${PIE_PHP_VERSION}-uploadprogress \
+  php${PIE_PHP_VERSION}-uuid \
   php${PIE_PHP_VERSION}-xml \
   php${PIE_PHP_VERSION}-xmlrpc \
   php${PIE_PHP_VERSION}-xsl \
+  php${PIE_PHP_VERSION}-yaml \
   php${PIE_PHP_VERSION}-zip \
   "
 
 ARG PHP_POOL_UID_MIN=9000
 ARG PHP_POOL_UID_MAX=9100
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 RUN set -xe \
-    && export DEBIAN_FRONTEND=noninteractive \
     && apt-get update && apt-get install -y --no-install-recommends \
         apt-transport-https \
         ca-certificates \
         software-properties-common \
     && add-apt-repository ppa:ondrej/php \
     && apt-get update && apt-get install -y --no-install-recommends \
-        curl \
         lighttpd libconfig-tiny-perl \
         psmisc \
         python3 python3-pip python3-botocore python3-jmespath python3-requests \

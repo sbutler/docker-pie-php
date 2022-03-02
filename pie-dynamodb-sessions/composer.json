@@ -11,6 +11,6 @@
         }
     ],
     "require": {
-        "aws/aws-sdk-php": "^3.52.2"
+        "aws/aws-sdk-php": "^3.211.1"
     }
 }
