@@ -18,6 +18,7 @@ php_envset () {
   echoerr "PHP_MAX_EXECUTION_TIME: ${PHP_MAX_EXECUTION_TIME:=120}"
   echoerr "PHP_DATE_TIMEZONE: ${PHP_DATE_TIMEZONE:=America/Chicago}"
   echoerr "PHP_LOGGING: ${PHP_LOGGING}"
+  echoerr "PHP_XDEBUG: ${PHP_XDEBUG:=off}"
 
   echoerr "PHP_SESSION_SAVE_HANDLER: ${PHP_SESSION_SAVE_HANDLER:=files}"
   echoerr "PHP_SESSION_SAVE_PATH: ${PHP_SESSION_SAVE_PATH:=/tmp}"
@@ -34,7 +35,7 @@ php_envset () {
 
   export PIE_PHP_VERSION PIE_PHPPOOLS_INCLUDE_DIRS PIE_PHPPOOLS_STATUSURLS_FILE PIE_PHPPOOLS_LOG_DIR
   export LIGHTTPD_ADMIN_SUBNET
-  export PHP_MEMORY_LIMIT PHP_POST_MAX_SIZE PHP_UPLOAD_MAX_FILESIZE PHP_MAX_FILE_UPLOADS PHP_MAX_EXECUTION_TIME PHP_DATE_TIMEZONE PHP_LOGGING
+  export PHP_MEMORY_LIMIT PHP_POST_MAX_SIZE PHP_UPLOAD_MAX_FILESIZE PHP_MAX_FILE_UPLOADS PHP_MAX_EXECUTION_TIME PHP_DATE_TIMEZONE PHP_LOGGING PHP_XDEBUG
   export PHP_SESSION_SAVE_HANDLER PHP_SESSION_SAVE_PATH
   export PHP_OPCACHE_MEMORY_CONSUMPTION PHP_OPCACHE_REVALIDATE_FREQ PHP_OPCACHE_INTERNED_STRINGS_BUFFER PHP_OPCACHE_MAX_ACCELERATED_FILES PHP_REALPATH_CACHE_SIZE PHP_REALPATH_CACHE_TTL
   export PHP_FCGI_MAX_REQUESTS
@@ -94,6 +95,9 @@ if [[ "$1" == "php-pie" ]]; then
   shift
   php_envset
   pie-loginit.pl
+  if [[ -n $PHP_XDEBUG && $PHP_XDEBUG != off ]]; then
+    phpenmod -s fpm xdebug
+  fi
 
   (
     # Start lighttpd to get PHP-FPM ping healthchecks
@@ -118,6 +122,9 @@ if [[ "$1" == "php-pie" ]]; then
 elif [[ "$1" == "php"* ]]; then
   php_envset
   pie-loginit.pl
+  if [[ -n $PHP_XDEBUG && $PHP_XDEBUG != off ]]; then
+    phpenmod -s fpm xdebug
+  fi
 
   exec "$@"
 elif [[ "$1" == "lighttpd"* || "$1" == "pie-aws-metrics.py" ]]; then

@@ -37,6 +37,7 @@ ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-xsl \
   php${PIE_PHP_VERSION}-yaml \
   php${PIE_PHP_VERSION}-zip \
+  php${PIE_PHP_VERSION}-xdebug \
   "
 
 ARG PHP_POOL_UID_MIN=9000
@@ -58,6 +59,7 @@ RUN set -xe \
         ssmtp \
         php${PIE_PHP_VERSION}-fpm \
         $PHP_MODULES \
+    && phpdismod -s fpm xdebug \
     && rm /etc/php/${PIE_PHP_VERSION}/fpm/pool.d/www.conf \
     && rm /etc/logrotate.d/php${PIE_PHP_VERSION}-fpm \
     && rm -rf /var/lib/apt/lists/*
@@ -109,7 +111,8 @@ ENV PHP_MEMORY_LIMIT=64M \
     PHP_MAX_FILE_UPLOADS=20 \
     PHP_MAX_EXECUTION_TIME=120 \
     PHP_DATE_TIMEZONE="America/Chicago" \
-    PHP_LOGGING=""
+    PHP_LOGGING="" \
+    PHP_XDEBUG="off"
 
 # Performance tuning nobs
 ENV PHP_OPCACHE_MEMORY_CONSUMPTION=64 \
@@ -125,6 +128,7 @@ ENV PHP_FCGI_MAX_REQUESTS=0
 VOLUME /etc/opt/pie/php${PIE_PHP_VERSION}/fpm
 VOLUME /run/php-fpm.sock.d /run/php-fpm.d
 VOLUME /var/log/php-fpm
+VOLUME /var/xdebug
 
 EXPOSE 9000-10000
 EXPOSE 8009
