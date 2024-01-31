@@ -4,7 +4,7 @@ set -e
 echoerr () { echo "$@" 1>&2; }
 
 php_envset () {
-  echoerr "PIE_PHP_VERSION: ${PIE_PHP_VERSION:=8.1}"
+  echoerr "PIE_PHP_VERSION: ${PIE_PHP_VERSION:=8.2}"
   echoerr "PIE_PHPPOOLS_INCLUDE_DIRS: ${PIE_PHPPOOLS_INCLUDE_DIRS:=/etc/php/${PIE_PHP_VERSION}/fpm/pool.d:/etc/opt/pie/php${PIE_PHP_VERSION}/fpm/pool.d}"
   echoerr "PIE_PHPPOOLS_STATUSURLS_FILE: ${PIE_PHPPOOLS_STATUSURLS_FILE:=/run/php-fpm.d/status-urls.txt}"
   echoerr "PIE_PHPPOOLS_LOG_DIR: ${PIE_PHPPOOLS_LOG_DIR:=/var/log/php-fpm}"

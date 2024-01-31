@@ -2,7 +2,7 @@ FROM publish/pie-base:latest-ubuntu22.04
 
 ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
-ENV PIE_PHP_VERSION 8.1
+ENV PIE_PHP_VERSION 8.2
 
 ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-bcmath \
@@ -18,7 +18,7 @@ ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-mbstring \
   php${PIE_PHP_VERSION}-memcached \
   php${PIE_PHP_VERSION}-mongodb \
-  php${PIE_PHP_VERSION}-mysqlnd \
+  php${PIE_PHP_VERSION}-mysql \
   php${PIE_PHP_VERSION}-oauth \
   php${PIE_PHP_VERSION}-odbc \
   php${PIE_PHP_VERSION}-opcache \
