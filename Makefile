@@ -1,7 +1,7 @@
 DISTDIR      := $(PWD)/dist/
 
 PROJECT      ?=publish
-REPO_NAME    ?=$(PROJECT)/pie-php8.2
+REPO_NAME    ?=$(PROJECT)/pie-php8.3
 REPO_URI     ?=$(shell aws ecr describe-repositories --repository-names $(REPO_NAME) --output text --query 'repositories[].repositoryUri' --region us-east-2)
 REPO_URI_BAK ?=$(shell aws ecr describe-repositories --repository-names $(REPO_NAME) --output text --query 'repositories[].repositoryUri' --region us-east-1)
 COMMIT_ID    :=$(shell git rev-parse --short HEAD)
