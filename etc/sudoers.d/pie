@@ -6,5 +6,5 @@ Defaults!/usr/local/bin/pie-entrypoint.sh   env_keep += "PHP_OPCACHE_MEMORY_CONS
 Defaults!/usr/local/bin/pie-entrypoint.sh   env_keep += "PHP_FCGI_MAX_REQUESTS PHP_FCGI_MAX_CHILDREN"
 Defaults:pie-agent !requiretty
 
-pie-agent    ALL = NOPASSWD: /usr/local/bin/pie-entrypoint.sh php-fpm[57].[0-9] -t *, /etc/cron.daily/logrotate, /bin/kill -USR2 1
+pie-agent    ALL = NOPASSWD: /usr/local/bin/pie-entrypoint.sh php-fpm[578].[0-9] -t *, /etc/cron.daily/logrotate, /bin/kill -USR2 1
 pie-agent    ALL = NOPASSWD: /usr/bin/killall -HUP lighttpd-angel
