@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-import boto3
 from collections import defaultdict
 import json
 import logging
 import os
 import re
-import requests
 import socket
 import time
+
+import boto3
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ logs_clnt = boto3.client('logs')
 ECS_TASKID_RE = re.compile(r'^.+:task/(?:(?P<cluster>[a-zA-Z0-9-]+)/)?(?P<id>.+)$')
 
 AGENT_HOST = os.environ.get('PHP_AWS_AGENT_HOST', 'localhost:8009')
-ECS_CONTAINER_METADATA_FILE = os.environ.get('ECS_CONTAINER_METADATA_FILE', None)
+ECS_CONTAINER_METADATA_URI_V4 = os.environ.get('ECS_CONTAINER_METADATA_URI_V4', None)
 METRICS_LOGGROUP_NAME = os.environ['PHP_AWS_METRICS_LOGGROUP_NAME']
 METRICS_LOGSTREAM_NAME = os.environ.get('PHP_AWS_METRICS_LOGSTREAM_NAME', None)
 METRICS_RATE = int(os.environ.get('PHP_AWS_METRICS_RATE', '300'))
@@ -64,39 +65,48 @@ class PHPPool(object):
 def get_ecs_metadata():
     """
     Gets the ECS metadata for the container. This requires the
-    ECS_CONTAINER_METADATA_FILE environment variable be defined or
+    ECS_CONTAINER_METADATA_URI_V4 environment variable be defined or
     an exception will be thrown.
     """
-    if not ECS_CONTAINER_METADATA_FILE:
-        raise ValueError('No ECS_CONTAINER_METADATA_FILE')
+    if not ECS_CONTAINER_METADATA_URI_V4:
+        raise ValueError('No ECS_CONTAINER_METADATA_URI_V4')
 
-    metadata_ready = False
-    metadata = None
-    while not metadata_ready:
+    container_metadata = None
+    task_metadata = None
+    while not (container_metadata and task_metadata):
         try:
-            with open(ECS_CONTAINER_METADATA_FILE, 'r') as f:
-                metadata = json.load(f)
-        except Exception:
-            logger.exception('Unable to open and parse %(file)', {
-                'file': ECS_CONTAINER_METADATA_FILE,
-            })
-        else:
-            metadata_ready = metadata.get('MetadataFileStatus', '') == 'READY'
+            container_response = requests.get(
+                ECS_CONTAINER_METADATA_URI_V4,
+                timeout=5,
+            )
+            container_response.raise_for_status()
 
-        if not metadata_ready:
-            logger.info('Waiting for ECS metadata')
+            task_response = requests.get(
+                f"{ECS_CONTAINER_METADATA_URI_V4}/task",
+                timeout=5,
+            )
+            task_response.raise_for_status()
+        except requests.RequestException:
+            logger.exception('Unable to fetch ECS metadata')
             time.sleep(1)
+        else:
+            container_metadata = container_response.json()
+            task_metadata = task_response.json()
+
+    if task_metadata['Cluster'].startswith('arn:'):
+        cluster = task_metadata['Cluster'].split('/')[-1]
+    else:
+        cluster = task_metadata['Cluster']
 
     result = {
-        'cluster':          metadata.get('Cluster', ''),
-        'taskArn':          metadata.get('TaskARN', ''),
-        'containerName':    metadata.get('ContainerName', ''),
+        'cluster':       cluster,
+        'taskArn':       task_metadata['TaskARN'],
+        'containerName': container_metadata['Name'],
     }
-    m = ECS_TASKID_RE.match(result['taskArn'])
-    if m:
-        result['taskId'] = m.group('id')
-    if result['containerName'] and result.get('taskId', None):
-        result['containerId'] = '{0}/{1}'.format(result['containerName'], result['taskId'])
+    if match := ECS_TASKID_RE.match(result['taskArn']):
+        result['taskId'] = match.group('id')
+    if result['containerName'] and result.get('taskId'):
+        result['containerId'] = f"{result['containerName']}/{result['taskId']}"
 
     return result
 
@@ -196,7 +206,7 @@ def process(pools, logstream_name, logstream_seqtoken):
 def run():
     logstream_name = METRICS_LOGSTREAM_NAME
     if not logstream_name:
-        if ECS_CONTAINER_METADATA_FILE:
+        if ECS_CONTAINER_METADATA_URI_V4:
             ecs_metadata = get_ecs_metadata()
             logstream_name = '{cluster}/{containerId}'.format(**ecs_metadata)
         else:

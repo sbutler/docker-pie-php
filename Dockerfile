@@ -70,7 +70,7 @@ COPY pie-entrypoint.sh /usr/local/bin/
 COPY pie-loginit.pl /usr/local/bin/
 
 COPY pie-aws-metrics.py /usr/local/bin/
-RUN pip3 install --no-cache-dir boto3
+RUN pip3 install --no-cache-dir boto3 requests
 
 RUN groupadd -r -g $HTTPD_GID pie-www-data
 RUN useradd -N -r -g pie-www-data -s /usr/sbin/nologin -u $HTTPD_UID pie-www-data
