@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 logs_clnt = boto3.client('logs')
 
 ECS_TASKID_RE = re.compile(r'^.+:task/(?:(?P<cluster>[a-zA-Z0-9-]+)/)?(?P<id>.+)$')
+STATUS_KEY_INVALID_RE = re.compile(r'[^a-zA-Z0-9_-]')
 
 AGENT_HOST = os.environ.get('PHP_AWS_AGENT_HOST', 'localhost:8009')
 ECS_CONTAINER_METADATA_URI_V4 = os.environ.get('ECS_CONTAINER_METADATA_URI_V4', None)
@@ -43,15 +44,22 @@ class PHPPool(object):
         r.raise_for_status()
 
         result = r.json()
-        if result.get('start time', 0) != self._start_time:
+        for key in list(result.keys()):
+            if STATUS_KEY_INVALID_RE.search(key):
+                value = result.pop(key)
+
+                key = STATUS_KEY_INVALID_RE.sub('_', key)
+                result[key] = value
+
+        if result.get('start_time', 0) != self._start_time:
             # PHP was restarted; clear our previous values
             self._status_prev = defaultdict(lambda: 0)
-            self._start_time = result['start time']
+            self._start_time = result['start_time']
 
         self._status_curr = defaultdict(lambda: 0)
-        for key in ('accepted conn', 'max children reached', 'slow requests'):
+        for key in ('accepted_conn', 'max_children_reached', 'slow_requests'):
             self._status_curr[key] = result.get(key, 0)
-            result['delta ' + key] = self._status_curr[key] - self._status_prev[key]
+            result['delta_' + key] = self._status_curr[key] - self._status_prev[key]
 
         return result
 
@@ -109,7 +117,6 @@ def get_ecs_metadata():
         result['containerId'] = f"{result['containerName']}/{result['taskId']}"
 
     return result
-
 
 def get_logstream_seqtoken(logstream_name):
     while True:
@@ -170,13 +177,17 @@ def process(pools, logstream_name, logstream_seqtoken):
                 'timestamp': int(time.time()) * 1000,
                 'message': json.dumps(pool_status),
             }
+        except requests.Timeout:
+            logger.error('Timeout fetching status for %(pool)s', {
+                'pool': pool,
+            })
         except Exception:
             logger.exception('Unable to fetch the status for %(pool)s', {
                 'pool': pool,
             })
 
     if not events:
-        logger.warn('No events built')
+        logger.warning('No events built')
         return logstream_seqtoken
 
     args = {
