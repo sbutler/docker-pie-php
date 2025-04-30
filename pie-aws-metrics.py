@@ -23,6 +23,7 @@ METRICS_LOGGROUP_NAME = os.environ['PHP_AWS_METRICS_LOGGROUP_NAME']
 METRICS_LOGSTREAM_NAME = os.environ.get('PHP_AWS_METRICS_LOGSTREAM_NAME', None)
 METRICS_RATE = int(os.environ.get('PHP_AWS_METRICS_RATE', '300'))
 POOLS_STATUSURLS_FILE = os.environ['PIE_PHPPOOLS_STATUSURLS_FILE']
+PHP_FCGI_MAX_CHILDREN = int(os.environ.get('PHP_FCGI_MAX_CHILDREN', '0'))
 
 class PHPPool(object):
     """ Gathers and tracks the status of a PHP pool. """
@@ -60,6 +61,9 @@ class PHPPool(object):
         for key in ('accepted_conn', 'max_children_reached', 'slow_requests'):
             self._status_curr[key] = result.get(key, 0)
             result['delta_' + key] = self._status_curr[key] - self._status_prev[key]
+
+        if PHP_FCGI_MAX_CHILDREN > 0 and 'max_children' not in result:
+            result['max_children'] = PHP_FCGI_MAX_CHILDREN
 
         return result
 
