@@ -137,6 +137,13 @@ $connect
 HERE
     }
 
+    say <<HERE;
+    "/php-fpm/$name/api/" => ((
+$connect
+        "check-local"   => "disable",
+    )),
+HERE
+
     printf $statusurls_fh "%s %s\n", $name, $values->{ 'status' } if $statusurls_fh && $values->{ 'status' };
     printf $pingurls_fh "%s %s\n", $name, $values->{ 'ping' } if $pingurls_fh && $values->{ 'ping' };
 }
@@ -144,3 +151,9 @@ HERE
 say ")";
 close $statusurls_fh if $statusurls_fh;
 close $pingurls_fh if $pingurls_fh;
+
+say "alias.url += (";
+POOL_ALIAS: foreach my $name (sort keys %pools) {
+        say qq|    "/php-fpm/$name/api/" => "/opt/pie/lighttpd/pool-api/",|;
+}
+say ")";
