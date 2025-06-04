@@ -12,7 +12,7 @@ use POSIX qw/mkfifo/;
 
 my $opt_includedirs = $ENV{ 'PIE_PHPPOOLS_INCLUDE_DIRS' };
 my $opt_logdir = $ENV{ 'PIE_PHPPOOLS_LOG_DIR' } || catdir( '/var', 'log', 'php-fpm' );
-my $opt_logtype = $ENV{ 'PHP_LOGGING' } || '';
+my $opt_logtype = $ENV{ 'PHP_LOGGING' } || 'link';
 my $opt_logrotate = catfile( '/etc', 'logrotate.d', 'php-fpm' );
 
 if (not $opt_includedirs && $ENV{ 'PIE_PHP_VERSION' }) {

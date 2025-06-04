@@ -41,7 +41,7 @@ use Try::Tiny;
 
 $ENV{ 'PATH' } = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
 $ENV{ 'PIE_PHP_VERSION' } ||= '8.3';
-$ENV{ 'PHP_LOGGING' } ||= '';
+$ENV{ 'PHP_LOGGING' } ||= 'link';
 
 my $cgi = CGI->new;
 

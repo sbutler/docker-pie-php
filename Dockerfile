@@ -112,7 +112,7 @@ ENV PHP_MEMORY_LIMIT=64M \
     PHP_MAX_FILE_UPLOADS=20 \
     PHP_MAX_EXECUTION_TIME=120 \
     PHP_DATE_TIMEZONE="America/Chicago" \
-    PHP_LOGGING="" \
+    PHP_LOGGING="link" \
     PHP_XDEBUG="off"
 
 # Performance tuning nobs
