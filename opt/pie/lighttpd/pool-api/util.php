@@ -156,7 +156,7 @@ class HTTPException extends Exception {
     }
 }
 
-function api_entrypoint( ?callable $handler = null ) {
+function api_entrypoint( ?callable $handler = null ) : void {
     if (is_null( $handler )) {
         $handler = 'handler';
     }
@@ -214,7 +214,7 @@ function parse_input() : mixed {
     return $data;
 }
 
-function require_authentication() : bool {
+function require_authentication() : void {
     if (empty( PIE_POOL_API_KEY )) {
         throw new HTTPException( 'API key not set', HTTPStatusCode::InternalServerError );
     } else if (empty( $_SERVER['PHP_AUTH_PW'] )) {
@@ -222,6 +222,4 @@ function require_authentication() : bool {
     } else if ($_SERVER['PHP_AUTH_PW'] !== PIE_POOL_API_KEY) {
         throw new HTTPException( 'Basic authentication failure', HTTPStatusCode::Forbidden );
     }
-
-    return true;
 }

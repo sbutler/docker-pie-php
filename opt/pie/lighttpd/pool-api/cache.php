@@ -59,7 +59,41 @@ function handle_cache_get( ?string $cache_type ) : array {
 
     $result = array();
     if (($cache_type === 'apcu' || $cache_type === 'all') && $apcu_enabled) {
-        $result['apcu'] = apcu_cache_info();
+        $info = apcu_cache_info();
+        unset( $info['cache_list'] );
+        unset( $info['slot_distribution'] );
+        unset( $info['deleted_list'] );
+
+        $it = new APCUIterator( null, APC_ITER_ALL, 100, APC_LIST_ACTIVE );
+        $info['items'] = array();
+        foreach ($it as $data) {
+            if ($data['type'] !== 'user')
+                    continue;
+
+            $key   = $data['key'];
+            $value = $data['value'];
+
+            $info['items'][$key] = array(
+                'ttl'           => $data['ttl'],
+                'num_hits'      => $data['num_hits'],
+                'mtime'         => $data['mtime'],
+                'creation_time' => $data['creation_time'],
+                'access_time'   => $data['access_time'],
+                'mem_size'      => $data['mem_size'],
+                'ref_count'     => $data['ref_count'],
+            );
+            if (is_null( $value ) || is_bool( $value ) || is_numeric( $value )) {
+                $info['items'][$key]['value'] = $value;
+            } elseif (is_string( $value )) {
+                if (preg_match( '/[^\x20-\x7E]/', $value)) {
+                    $info['items'][$key]['value_b64'] = base64_encode( $value );
+                } else {
+                    $info['items'][$key]['value'] = $value;
+                }
+            }
+        }
+
+        $result['apcu'] = $info;
     }
 
     if (($cache_type === 'opcache' || $cache_type === 'all') && $opcache_enabled) {
