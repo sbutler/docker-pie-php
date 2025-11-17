@@ -2,6 +2,7 @@ FROM publish/pie-base:latest-ubuntu22.04
 
 ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
+ARG W3TC_VERSION=2.8.14
 ENV PIE_PHP_VERSION=8.3
 
 ARG PHP_MODULES="\
@@ -69,6 +70,11 @@ COPY etc/ /etc
 COPY opt/ /opt
 COPY pie-entrypoint.sh /usr/local/bin/
 COPY pie-loginit.pl /usr/local/bin/
+
+ADD https://downloads.wordpress.org/plugin/w3-total-cache.${W3TC_VERSION}.zip /tmp/w3tc.zip
+RUN set -xe \
+    && unzip /tmp/w3tc.zip -d /opt \
+    && rm /tmp/w3tc.zip
 
 COPY pie-aws-metrics.py /usr/local/bin/
 RUN pip3 install --no-cache-dir boto3 requests

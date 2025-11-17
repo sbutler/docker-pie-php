@@ -18,6 +18,9 @@ __check_defined = \
 clean:
 	rm -fr -- .venv || :
 	rm -fr -- "$(DISTDIR)" || :
+	for _tag in latest latest-ubuntu latest-ubuntu22.04; do \
+		docker image rm  $(REPO_NAME):$$_tag || :; \
+	done
 
 ecr-login:
 	@:$(call check_defined, REPO_URI, Repository URI)
@@ -26,7 +29,6 @@ ecr-login:
 
 image-build:
 	[ -e "$(DISTDIR)" ] || mkdir -p "$(DISTDIR)"
-	docker pull public.ecr.aws/lts/ubuntu:22.04
 	docker build -t $(REPO_NAME):latest --no-cache --iidfile "$(DISTDIR)/pie-php.image-id" .
 	for _tag in "commit-$(COMMIT_ID)" latest-ubuntu latest-ubuntu22.04; do \
 		docker tag $(REPO_NAME):latest $(REPO_NAME):$$_tag; \
