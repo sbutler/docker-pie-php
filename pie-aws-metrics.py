@@ -181,6 +181,11 @@ def process(pools, logstream_name, logstream_seqtoken):
                 'timestamp': int(time.time()) * 1000,
                 'message': json.dumps(pool_status),
             }
+        except requests.HTTPError as httpErr:
+            logger.error('HTTP error fetching status for %(pool)s: %(err)s', {
+                'pool': pool,
+                'err': str(httpErr),
+            })
         except requests.Timeout:
             logger.error('Timeout fetching status for %(pool)s', {
                 'pool': pool,
