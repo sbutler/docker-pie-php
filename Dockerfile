@@ -3,7 +3,7 @@ FROM publish/pie-base:latest-ubuntu22.04
 ARG HTTPD_UID=8001
 ARG HTTPD_GID=8001
 ARG W3TC_VERSION=2.9.4
-ENV PIE_PHP_VERSION=8.4
+ENV PIE_PHP_VERSION=8.5
 
 ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-apcu \
@@ -23,7 +23,6 @@ ARG PHP_MODULES="\
   php${PIE_PHP_VERSION}-mysql \
   php${PIE_PHP_VERSION}-oauth \
   php${PIE_PHP_VERSION}-odbc \
-  php${PIE_PHP_VERSION}-opcache \
   php${PIE_PHP_VERSION}-pgsql \
   php${PIE_PHP_VERSION}-pspell aspell-en \
   php${PIE_PHP_VERSION}-raphf \
